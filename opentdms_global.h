@@ -1,0 +1,12 @@
+#ifndef OPENTDMS_GLOBAL_H
+#define OPENTDMS_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(OPENTDMS_LIBRARY)
+#  define OPENTDMSSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define OPENTDMSSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // OPENTDMS_GLOBAL_H
