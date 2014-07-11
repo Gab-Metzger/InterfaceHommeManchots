@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>histoDialog</class>
+ <widget class="QDialog" name="histoDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Histogrammes</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="histo1">
+      <attribute name="title">
+       <string>Balance 1</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QVBoxLayout" name="histo1Layout"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="histo2">
+      <attribute name="title">
+       <string>Balance 2</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QVBoxLayout" name="histo2Layout"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="histo3">
+      <attribute name="title">
+       <string>Balance 3</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QVBoxLayout" name="histo3Layout"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="histo4">
+      <attribute name="title">
+       <string>Somme balances</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <layout class="QVBoxLayout" name="histo4Layout"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
