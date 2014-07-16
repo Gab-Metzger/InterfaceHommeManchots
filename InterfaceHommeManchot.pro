@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     statistique.cpp \
     analyse.cpp \
     opentdmsdialog.cpp \
-    detections.cpp
+    ouverturemanchot.cpp \
+    parcoursmanchots.cpp
 
 HEADERS  += mainwindow.h \
     lecture_fichiers.h \
@@ -30,12 +31,13 @@ HEADERS  += mainwindow.h \
     statistique.h \
     analyse.h \
     opentdmsdialog.h \
-    detections.h
+    ouverturemanchot.h \
+    parcoursmanchots.h
 
 FORMS    += mainwindow.ui \
     histodialog.ui \
     opentdmsdialog.ui \
-    detections.ui
+    ouverturemanchot.ui
 
 DEPENDPATH += C:\qwt-6.1.0\include\
 INCLUDEPATH += C:\qwt-6.1.0\src\

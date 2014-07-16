@@ -18,7 +18,7 @@
 #include "lecture_fichiers.h"
 #include "analyse.h"
 #include "opentdmsdialog.h"
-#include "detections.h"
+#include "ouverturemanchot.h"
 
 namespace Ui {
 class MainWindow;
@@ -47,9 +47,7 @@ private:
     QwtPlotCurve **curveFlat[4];
     QPen *color [4];
     histoDialog *histoWindow;
-    Detections *detectionWindow;
     int errorOpenFile;
-    QSqlDatabase db;
     bool existFlat;
     /**
      * @brief affiche
@@ -101,7 +99,9 @@ private slots:
     void on_pushButton_clicked();
     void on_actionEnregistrer_triggered();
     void on_actionLisser_la_courbe_triggered();
-    void on_actionAffichier_triggered();
+    void on_actionOuvrir_manchot_triggered();
+    void on_checkBox_2_clicked();
+    void on_checkBox_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -26,12 +26,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balance2->setStyleSheet("QCheckBox {color: green;}");
     ui->balance3->setStyleSheet("QCheckBox {color: red;}");
 
-    db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setDatabaseName("antavia_ddu");
-    db.setUserName("root");
-    db.setPassword("narwolpobo");
-    db.open();
+//    db = QSqlDatabase::addDatabase("QMYSQL");
+//    db.setHostName("localhost");
+//    db.setDatabaseName("antavia_ddu");
+//    db.setUserName("root");
+//    db.setPassword("narwolpobo");
+//    db.open();
 
     existFlat = false;
 }
@@ -44,7 +44,7 @@ MainWindow::~MainWindow()
         dir.removeRecursively();
     }
     writeSettings();
-    db.close();
+    //db.close();
     delete ui;
 }
 
@@ -72,14 +72,17 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
     double **dataInterval;
     char heure[10];
     int h,m,s,ms,max;
-    Detections dtc;
     analyse ANALYSE;
     Flat *indexArray = new Flat();
     Stat *statArray =  new Stat();
     QVector<double> weightWithConfidence(2);
     QString output = "";
+    bool caseTab[2];
 
-    errorOpenFile = FICHIERS.lire_fichier(filename,&l_data,&nb_valeur,&nb_passage,&cas,num_passage,heure);
+    caseTab[0] = ui->checkBox_2->isChecked();
+    caseTab[1] = ui->checkBox->isChecked();
+
+    errorOpenFile = FICHIERS.lire_fichier(filename,&l_data,&nb_valeur,&nb_passage,&cas,num_passage,heure,caseTab);
     if (errorOpenFile == 0) {
         if (maxInt == -1) {
             plot->setAxisScale(QwtPlot::xBottom,minInt,nb_valeur);
@@ -175,7 +178,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
         QwtPlotZoomer* zoomer = new QwtPlotZoomer(plot->canvas());
 
         weightWithConfidence = ANALYSE.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
-        output = "Poids : " + QString::number(weightWithConfidence[0]) + " - Indice de confiance : " + QString::number(weightWithConfidence[1]);
+        output = "Poids : " + QString::number(weightWithConfidence[0]) + "\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
         ui->label_3->setText(output);
 
         for(int j=0;j<4;j++)
@@ -296,7 +299,7 @@ void MainWindow::on_actionAlgorithme_de_plats_triggered()
 
     weightWithConfidence = ANALYSE.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
 
-    output = "Poids : " + QString::number(weightWithConfidence[0]) + " - Indice de confiance : " + QString::number(weightWithConfidence[1]);
+    output = "Poids : " + QString::number(weightWithConfidence[0]) + "\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
     ui->label_3->setText(output);
 
     traceFlat(indexArray,statArray);
@@ -370,13 +373,6 @@ void MainWindow::on_actionLisser_la_courbe_triggered()
     tracer(ui->spinBox->value(),0,-1,1);
 }
 
-void MainWindow::on_actionAffichier_triggered()
-{
-    detectionWindow = new Detections();
-    detectionWindow->setAttribute(Qt::WA_DeleteOnClose);
-    detectionWindow->exec();
-}
-
 void MainWindow::traceFlat(Flat *indexArray, Stat *statArray) {
     double **xs[4];
     double **ys[4];
@@ -414,4 +410,25 @@ void MainWindow::traceFlat(Flat *indexArray, Stat *statArray) {
     plot->updateAxes();
     plot->replot();
     plot->show();
+}
+
+void MainWindow::on_actionOuvrir_manchot_triggered()
+{
+   OuvertureManchot omWindow;
+   omWindow.setAttribute(Qt::WA_DeleteOnClose);
+   omWindow.exec();
+}
+
+void MainWindow::on_checkBox_2_clicked()
+{
+    // Affichage Cas simples
+    tracer(0,0,-1);
+    ui->spinBox->setValue(0);
+}
+
+void MainWindow::on_checkBox_clicked()
+{
+    // Affichage Cas complexes
+    ui->spinBox->setValue(0);
+    tracer(0,0,-1);
 }
