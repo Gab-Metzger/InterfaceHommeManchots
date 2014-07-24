@@ -19,22 +19,18 @@ bool statistique::compare(double &a, double &b) {
     return a < b ? false : true;
 }
 
-double* statistique::getSumData(double **data, int numDataValues, double* moy, double* var) {
+void statistique::getStatData(double *data, int numDataValues, double* moy, double* var) {
         int i;
-        double* 	sum = (double*)calloc(2, sizeof(double));
-        double* data_s = (double*)malloc(numDataValues*sizeof(double));
+        double sum[2]={0,0};
 
         for (i = 0; i < numDataValues; i++) {
-            data_s[i] = data[0][i] + data[1][i] + data[2][i];
-            sum[0] += data_s[i];
-            sum[1] += (data_s[i] * data_s[i]);
+            sum[0] += data[i];
+            sum[1] += (data[i] * data[i]);
         }
 
         *moy = sum[0] / numDataValues;
         sum[1] = sum[1] / numDataValues;
-        *var = sum[1] - *moy;
-
-        return(data_s);
+        *var = sum[1] - (*moy) * (*moy);
 }
 
 void statistique::moustach(double* data, int nb_element, double *d, double *f, double *moy, double*var, int* nb_element_R, double quartile[3]) {
@@ -61,35 +57,36 @@ void statistique::moustach(double* data, int nb_element, double *d, double *f, d
         else { quartile[1] = (data_t.at(nb_element_t / 2) + data_t.at((nb_element_t / 2) - 1) ) / 2; }
         quartile[2] = data_t.at((3 * nb_element_t) / 4);
         double diff = 1.5*(quartile[2] - quartile[0]);
-        int i = 0, d_i = 0, f_i = 0;
 
-        while ( (i < nb_element_t ) && data_t.at(i) <= (quartile[2] + diff) ) {
-            if (*d <= (quartile[0] - diff)) {
-                *d = data_t.at(i);
+        double borneInf = (quartile[0] - diff);
+        double borneSup = (quartile[2] + diff);
+        int i = 0, d_i = 0, f_i = 0;
+        *var = 0.0;
+
+        while ( (i < nb_element_t ) && data_t[i] <= borneSup ) {
+            if (*d <= borneInf ) {
+                *d = data_t[i];
                 d_i = i;
-                i++;
             }
             else {
-                *moy += data_t.at(i);
-                i++;
+                *moy += data_t[i];
+                *var += data_t[i] * data_t[i];
             }
+            i++;
         }
-        *f = data_t.at(i-1);
+        *f = data_t[i-1];
 
         f_i = i;
         d_i++;
 
         *nb_element_R = (f_i - d_i);
 
-        *moy = *moy / *nb_element_R;
+        if ( *nb_element_R > 0 ) {
+            *moy = *moy / *nb_element_R;
 
-        *var = 0.0;
-        for (i = d_i; i < f_i; i++) {
-            *var += (data_t.at(i) - *moy)* (data_t.at(i) - *moy);
+            *var = *var / *nb_element_R;
+            *var = *var - (*moy * *moy);
         }
-        *var = *var / *nb_element_R;
-
-        //cout << *var << " , " << *moy << endl;
     }
 }
 

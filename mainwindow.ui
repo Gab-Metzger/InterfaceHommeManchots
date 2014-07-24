@@ -187,6 +187,8 @@
     <addaction name="actionAfficher"/>
     <addaction name="actionAlgorithme_de_plats"/>
     <addaction name="actionLisser_la_courbe"/>
+    <addaction name="separator"/>
+    <addaction name="actionR_sultat"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuHistogrammes"/>
@@ -245,6 +247,11 @@
   <action name="actionOuvrir_manchot">
    <property name="text">
     <string>Ouvrir manchot ...</string>
+   </property>
+  </action>
+  <action name="actionR_sultat">
+   <property name="text">
+    <string>Résultat</string>
    </property>
   </action>
  </widget>

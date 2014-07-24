@@ -3,7 +3,7 @@
 
 
 #include "opentdms_global.h"
-#include <nilibddc.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <QDebug>
@@ -12,15 +12,6 @@
 #include <QDebug>
 #include <math.h>
 #include <QtWidgets/QMessageBox>
-
-//-----------------------------------------------------------------------------
-// Macros
-//-----------------------------------------------------------------------------
-#define ddcChk(f) if (ddcError = (f), ddcError < 0) goto Error;
-#ifdef nullChk
-#undef nullChk
-#endif
-#define nullChk(p) if (!(p)) { ddcError = DDC_OutOfMemory; goto Error; }
 
 
 
@@ -34,55 +25,22 @@ public:
      * @param trajet_prov
      * @param trajet_dest
      */
-    int creation_txt(QString trajet_prov, QString chemin_Dossier_arrive, QString date,QString heure, QString plateau);
-    /**
-     * @brief lecture_tdms
-     * @param trajet
-     * @param data
-     * @param nb
-     * @param num_plateau
-     * @return
-     */
-    int lecture_tdms(char* trajet , double** data, int nb[3], int num_plateau);
-    /**
-     * @brief freeTableauDim2
-     * @param tableau
-     * @param x
-     */
-    void freeTableauDim2(double** tableau, int x);
+    int creation_txt(QString chemin_Dossier_tdms, QString chemin_Dossier_arrive,QString infoFichier,int idManchot);
+    void Manchot_txt(QString cheminDossierTdms,QString cheminDossierArrive,int idManchot);
 private:
-    /**
-     * @brief ReadFile
-     * @param nb_valeur
-     * @param fichier
-     * @param data
-     * @return
-     */
-    int ReadFile(int* nb_valeur, char * fichier, double** data);
-    /**
-     * @brief ReadGroups
-     * @param file
-     * @param nb_valeur_t
-     * @param data
-     * @return
-     */
-    int ReadGroups(DDCFileHandle file, int* nb_valeur_t, double** data);
-    /**
-     * @brief ReadChannels
-     * @param group
-     * @param nb_valeur_t
-     * @param data_l
-     * @return
-     */
-    int ReadChannels(DDCChannelGroupHandle group, int* nb_valeur_t, double** data_l); 
-
-    void fichiertdms_erreur(QString chemin_fichier, QString nomfichier, QString cause);
+    void FichierTdmsErreurDossier(QString chemin_fichier, QString nomfichier, QString cause);
     /**
      * @brief fichier_pourcentage
      * @param trajet_dest
      * @param nb_cas
      */
     void fichier_pourcentage(QString trajet_dest, double nb_cas[2]);
+
+    void analyse3plateau( QFileInfoList listFichierTdms,char* trajet_dest,QFileInfo InfoDossier ,QString trajet_TDMS,int i,double *nb_cas);
+
+    void ParcourFichierJour(QString trajet_prov, QDir Dossier_txt, QFileInfo InfoDossier, double nb_cas[2]);
+
+    void FichierTdmsErreurDossier(QFileInfo InfoDossier,QString heure,int num_plateau,QString trajet_dest,QString cause);
 };
 
 #endif // OPENTDMS_H

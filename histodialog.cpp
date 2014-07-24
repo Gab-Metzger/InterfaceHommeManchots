@@ -1,12 +1,34 @@
 #include "histodialog.h"
 #include "ui_histodialog.h"
-#include "statistique.h"
 
-histoDialog::histoDialog(double**data, int nb_valeur, QWidget *parent) :
+histoDialog::histoDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::histoDialog)
 {
     ui->setupUi(this);
+}
+
+histoDialog::~histoDialog()
+{
+    delete ui;
+}
+
+void histoDialog::setData(double**data, int nb_valeur) {
+    //Let's write the curves
+    double max[4];
+    calculMax(data,nb_valeur,max);
+
+    for (int i = 0 ; i < 4; i++ ) {
+        double histoMax = setDataInHisto(data,nb_valeur,max[i],i);
+        setQuartileInHisto(data,nb_valeur,max[i],histoMax,i);
+
+        histoPlot[i]->replot();
+        histoPlot[i]->show();
+    }
+}
+
+
+void histoDialog::initHisto(){
 
     histoPlot[0]  = new QwtPlot(this);
     histoPlot[0]->setTitle("Histogramme 1");
@@ -37,23 +59,12 @@ histoDialog::histoDialog(double**data, int nb_valeur, QWidget *parent) :
     for(int i=0;i<5;i++) {
         for(int j=0;j<4;j++) {
             curve_Q[i][j] = new QwtPlotMarker();
+            if ( i == 0 ) {
+                curvenormal[j] = new QwtPlotCurve();
+            }
         }
     }
-
-    //Let's write the curves
-    for (int i = 0 ; i < 4; i++ ) {
-        setDataInHisto(data,nb_valeur,i);
-        setQuartileInHisto(data,nb_valeur,i);
-        histoPlot[i]->replot();
-        histoPlot[i]->show();
-    }
 }
-
-histoDialog::~histoDialog()
-{
-    delete ui;
-}
-
 
 void histoDialog::Histogramme(QwtPlotHistogram *histo, QwtPlot *plot_H) {
     histo->setPen( QPen( Qt::black ) );
@@ -64,48 +75,42 @@ void histoDialog::Histogramme(QwtPlotHistogram *histo, QwtPlot *plot_H) {
     plot_H->show();
 }
 
-void histoDialog::calculMax(double **data, int nb_valeur, double max[4]) {
+void histoDialog::calculMax(double **data, int nb_valeur,double max[4]) {
     max[0]=data[0][0] ;
     max[1]=data[1][0] ;
     max[2]=data[2][0] ;
     max[3]=max[0];
 
     for(int i=0; i<4; i++) {
-        for (int x = 0; x<nb_valeur; x++) {
+        for (int x = 1; x < nb_valeur; x++) {
             if (data[i][x] > max[i]) {
+
                 max[i] = data[i][x];
             }
         }
     }
 }
 
-void histoDialog::setDataInHisto(double**data,int nb_valeur,int c)
+double histoDialog::setDataInHisto(double**data,int nb_valeur,double max,int c)
 {
-        double max[4];
-        calculMax(data,nb_valeur,max);
+        double histoMax=0;
         QVector<QwtIntervalSample> tmp_sample(nb_valeur);
-        QVector<double> element_interval(10*max[c] + 1 );
-        int i=0,E=0;
+        QVector<double> element_interval;
+        int size = floor(10 * max);
+        initInter(&element_interval,data[c],max,nb_valeur,&histoMax);
 
-        element_interval.fill(0.0);
-
-        for(i = 0 ; i < nb_valeur; i++ ) {
-            if ( data[c][i] > 0.5 ) {
-
-                E = floor( 10 * data[c][i]);
-                element_interval.replace(E,element_interval.at(E) + 1.0);
-            }
+        for(int i = 0 ;i< size ;i++) {
+            tmp_sample.append(QwtIntervalSample(element_interval[i], double(i/10.0) , double(i/10.0) + 0.1 ));
         }
-
-        for(i = 0 ;i<(10 * max[c]);i++) {
-            tmp_sample.append(QwtIntervalSample(element_interval.at(i), double(i/10.0) , double(i/10.0) + 0.1 ));
-        }
-
         histo[c]->setData(new QwtIntervalSeriesData(tmp_sample));
         element_interval.clear();
+
+        return histoMax;
 }
 
-void histoDialog::setQuartileInHisto(double**data,int nb_valeur,int c) {
+
+
+void histoDialog::setQuartileInHisto(double**data,int nb_valeur,double max,double maxHisto,int c) {
 
     int nb_element_R=0,i=0;
     double moy=0.0,var=0.0,*quartile=(double*)calloc(3,sizeof(double)),d=0.0,f=0.0;
@@ -118,7 +123,7 @@ void histoDialog::setQuartileInHisto(double**data,int nb_valeur,int c) {
     for(int j = 0 ;j<5;j++) {
         curve_Q[j][c]->detach();
     }
-    statistique STAT;
+
     STAT.moustach(data[c],nb_valeur,&d,&f,&moy,&var,&nb_element_R,quartile);
 
     double valX =0.0;
@@ -147,6 +152,20 @@ void histoDialog::setQuartileInHisto(double**data,int nb_valeur,int c) {
     title.setFont(QFont("Helvetica", 8));
     histoPlot[c]->setTitle(title);
 
+    //debut normal
+    initLoiNormal(&loiNormal[c],moy,maxHisto,max);
+
+
+     xs[c] = (double*)calloc((10*max)+1,sizeof(double));
+     int size = floor(10*max)+1;
+     for(int j=0;j<size;j++) {
+          xs[c][j]=j/10.0;
+     }
+
+    curvenormal[c]->setRawSamples(xs[c],loiNormal[c],size);
+    curvenormal[c]->attach(histoPlot[c]);
+    // fin normal
+
     for(i=0;i<5;i++)
     {
 
@@ -169,5 +188,88 @@ void histoDialog::setQuartileInHisto(double**data,int nb_valeur,int c) {
 
         curve_Q[i][c]->attach(histoPlot[c]);
     }
+}
 
+void histoDialog::initInter(QVector<double> *element_interval,double* data,double max, int nb_valeur, double *histoMax) {
+    int i=0,E=0;
+    int size = floor(10*max)+1;
+
+    element_interval->resize(size);
+    element_interval->fill(0.0);
+
+    for(i = 0 ; i < nb_valeur; i++ ) {
+        if ( data[i] > 0.5 ) {
+            E = floor( 10 * data[i]);
+            element_interval->replace(E,element_interval->at(E) + 1.0);
+
+            if ( element_interval->at(E) > *histoMax ) {*histoMax = element_interval->at(E);}
+        }
+    }
+}
+
+void  histoDialog::initLoiNormal(double** loiNormal, double moy, double maxHisto, double max) {
+     int size = floor(10*max)+1;
+    (*loiNormal) = (double*)calloc(size,sizeof(double));
+
+    for(int j=0;j<size;j++) {
+        (*loiNormal)[j] = maxHisto * exp(-0.5*( (((j/10.0)- moy)) * (((j/10.0)- moy)) ));
+    }
+}
+
+
+QVector<double> histoDialog::caractLoiNormal(double max[4],double** data,double nbData) {
+    double res=0,nbVal=0;
+    double moy=0,var=0,d,f;
+    int nbR=0;
+    double quar[4];
+
+    QVector<double> element_interval,caractSelected(2,0.0);
+
+    for (int c=0; c < 4;c++) {
+        res=0;
+        nbVal=0;
+
+        STAT.moustach(data[c],nbData,&d,&f,&moy,&var,&nbR,quar);
+
+        double histoMax=0;
+        int size = floor(10 * max[c]);
+        initInter(&element_interval,data[c],max[c],nbData,&histoMax);
+
+        double* loiNormal;
+        initLoiNormal(&loiNormal,moy,histoMax,max[c]);
+
+        for(int i = 0 ;i<size;i++) {
+            if ( (double(i)/10.0 > d) && (double(i)/10.0 < f) ) {
+                if ( element_interval[i] > loiNormal[i] )  {
+                    res+=floor(loiNormal[i]);
+                }
+                else {
+                    res+= element_interval[i];
+                }
+                nbVal += element_interval[i];
+            }
+        }
+
+        if ( nbVal > 0) {
+             res = res/nbVal;
+
+             double diff = fabs(moy-quar[1]);
+             if ( ( (double(res)/var) > caractSelected[1] )  && (c == 3) ) {
+                 if ( (res > 0.85)  && diff < 0.2 ) {
+                     caractSelected[0] =  moy;
+                     caractSelected[1] =  (res/var);
+                 }
+                 else if ( (res >= 0.80) && (res <= 0.85) && (diff < 0.15) ) {
+                     caractSelected[0] =  moy;
+                     caractSelected[1] =  (res/var);
+                 }
+
+
+             }          
+        }
+        free(loiNormal);
+        element_interval.clear();
+    }
+
+    return caractSelected;
 }

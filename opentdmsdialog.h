@@ -29,6 +29,7 @@ public:
      * @return
      */
     QString getFileName();
+    bool getAuthorizationDraw();
 
 public slots:
     void slot_finished();
@@ -48,6 +49,7 @@ private:
     QFutureWatcher<void> futureWatcher;
     QProgressDialog* progressDialog;
     OpenTdms files;
+    bool authorization;
     /**
      * @brief writeRegister
      * @param path

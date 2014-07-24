@@ -5,17 +5,41 @@
 #include <QDebug>
 #include <math.h>
 #include <QtConcurrent/QtConcurrentRun>
+#include <QMutex>
+#include "bruit.h"
+#include "detections.h"
+#include <QFile>
 
-#define BARRE 0.15
-#define BRUIT 0.08
-#define BARRE_M 1.0
 #define NOMBRE_M 150
 #define TEMPS_VOL 50
 #define NB_REP 10
 #define LGMINPIC 10
-#define TAILLEMINPIC 2.5
+#define NOMBRESTAG 2000
+#define ECARTHAUT 0.1
 
-typedef struct infoCourbe Analyse;
+typedef struct infoCourbe{
+
+    int NombreData;
+    double Data[3];
+
+    int indiceCourant[3];
+    int indiceValeur0[3];
+    int indiceFinPassage;
+
+    int informationPic[3];
+    int courbePremierPic;
+
+    int nb_front_M[3];
+    int front_D[3];
+
+    int DroitEcriture;
+
+}Analyse;
+
+typedef struct Manchot {
+    QVector<QVector<int> > tableau;
+    int IndiceCourant;
+}Manchot;
 
 class Passage
 {
@@ -30,7 +54,10 @@ public:
      * @param heure
      * @return
      */
-    int detection_passage(double** data, int nb, QString titre_valeur, QString titre_reference, int heure, double nb_cas[]);
+    int detection_passage(double** data, int nb, QString titre_valeur,QString date,int heure, double nb_cas[],int idManchot);
+    bruit Bruit;
+    Detections Dt;
+    QMutex ecriture;
 
 private:
     /**
@@ -53,7 +80,7 @@ private:
      * @param data
      * @param j
      */
-    void detection_front(double** data, int i, Analyse *InfoAnalyse);
+    void detection_front(double** data, int i, Analyse *InfoAnalyse, Pic RefPic);
     /**
      * @brief ecriture_fichier
      * @param f
@@ -61,7 +88,7 @@ private:
      * @param k
      * @param InformationAnalyse
      */
-    void ecriture_fichier(FILE* f, double** data, Analyse *InfoAnalyse, int indiceFinPicPrec[]);
+    void ecriture_fichier(QString titre_valeur,Manchot *Adelie, double** data,Analyse *InfoAnalyse,int indiceFinPicPrec[3],Pic RefPic[3],int heure,QString date);
     /**
      * @brief indice_min
      * @param index_0
@@ -76,7 +103,7 @@ private:
      * @param k
      * @return
      */
-    void detection_cote(double** data,int k,Analyse *InfoAnalyse);
+    void detection_cote(double** data, int k, Analyse *InfoAnalyse, Pic *RefCote, Pic RefPic);
     /**
      * @brief detection_debut
      * @param data
@@ -84,14 +111,14 @@ private:
      * @param InformationAnalyse
      * @return
      */
-    void detection_debut(double** data,int k,Analyse *InfoAnalyse);
+    void detection_debut(double** data, int k, Analyse *InfoAnalyse, Pic *RefPic, Pic *RefCote);
     /**
      * @brief detection_debut_ensemble
      * @param data
      * @param InformationAnalyse
      * @return
      */
-    void detection_debut_ensemble(double** data,Analyse *InfoAnalyse);
+    void detection_debut_ensemble(double** data, Analyse *InfoAnalyse, Pic RefPic[]);
     /**
      * @brief fin_passage
      * @param incr
@@ -100,7 +127,7 @@ private:
      * @param cmpt
      * @return
      */
-    int fin_passage(double **data, Analyse *InfoAnalyse);
+    int fin_passage(double **data, Analyse *InfoAnalyse, Pic RefPic[]);
     /**
      * @brief validation_analyse
      * @param pic
@@ -116,7 +143,7 @@ private:
      * @param InformationAnalyse
      * @return
      */
-    int detection_bruit(double** data,int k,Analyse *InfoAnalyse);
+    int detection_bruit(double** data, int k, Analyse *InfoAnalyse, Pic RefPic);
     /**
      * @brief front_bas
      * @param data
@@ -124,18 +151,26 @@ private:
      * @param InfoAnalyse
      * @return
      */
-    int front_bas(double** data, int courbe, int refIndice, Analyse *InfoAnalyse);
+    int front_bas(double** data, int courbe, int *refIndice, Analyse *InfoAnalyse, Pic *RefPic);
     /**
      * @brief affichageInfoAnalyse
      * @param InfoAnalyse
      */
     void affichageInfoAnalyse(Analyse *InfoAnalyse);
 
-    int intersectionCourbe(Analyse *InfoAnalyse,int a ,int b);
+    int intersectionCourbe(Analyse *InfoAnalyse, double **data, Pic RefPic[], int a , int b);
 
-    void maxFinPossible(Analyse *InfoAnalyse);
+    int maxFinPossible(Analyse *InfoAnalyse, double **data, Pic RefPic[]);
 
-    void FinPic(double** data,int k,Analyse *InfoAnalyse);
+    void FinPic(double** data, int k, Analyse *InfoAnalyse, Pic *RefPic);
+
+    void testCourbeComm(int a,int b,int l,double stat[3][3],double** data,Analyse *InfoAnalyse);
+
+    int intervalCourbe(Analyse *InfoAnalyse,int r,int l);
+
+    void MiseAJourFront(Analyse *InfoAnalyse,double** data,Pic RefPic[]);
+
+
 };
 
 #endif // PASSAGE_H

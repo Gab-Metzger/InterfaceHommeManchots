@@ -9,14 +9,21 @@ analyse::analyse()
 /////////////////////////////////////////
 
 void analyse::detectOneFlat(int *index, double *data, int nb_value) {
-    while ((fabs(data[*index+1]-data[*index]) > SEUIL_V) && (*index < nb_value) && (data[*index] > SEUIL_V)) {
+
+    while (  (*index < nb_value) && (data[*index] <= SEUIL_V) ) {
+
+        while ( (*index < nb_value) && (data[*index] <= SEUIL_V) ) {
             *index = *index + 1;
+        }
+
+        while (  (*index < nb_value)  && (fabs(data[*index+1]-data[*index]) >= SEUIL_V) && (data[*index] >= SEUIL_V) ) {
+                *index = *index + 1;
+        }
     }
 }
 
-void analyse::lookIntoOneFlat(int *index, double *data, int nb_value) {
-    int start = *index;
-    while ((fabs(data[start]-data[*index]) < SEUIL_V) && (*index < nb_value)) {
+void analyse::lookIntoOneFlat(int *index,int start, double *data, int nb_value) {
+    while ( (*index < nb_value) && (fabs(data[start]-data[*index]) < SEUIL_V) &&  (data[*index] >= SEUIL_V) ) {
         *index = *index + 1;
     }
 }
@@ -27,19 +34,23 @@ void analyse::detectAllFlat(double **data, int nb_value,Flat *array) {
     for (int i=0; i<4; i++){
         array->indexStart[i].resize(nb_value/SEUIL_H);
         array->indexStop[i].resize(nb_value/SEUIL_H);
-        while(j < nb_value) {
+        while(j < nb_value && (nb_value/SEUIL_H) >= 1 ) {
             detectOneFlat(&j,data[i],nb_value);
+
             if ((nb_flat > 0) && (array->indexStop[i][nb_flat-1] == j)) {
                 nb_flat--;
             }
-            else {
+            else if ( j < nb_value) {
                 array->indexStart[i][nb_flat] = j;
+                lookIntoOneFlat(&j,array->indexStart[i][nb_flat],data[i],nb_value);
+
+                if ((j-array->indexStart[i][nb_flat]) > SEUIL_H ) {
+                    array->indexStop[i][nb_flat] = j;
+                    nb_flat++;
+                    j++;
+                }
             }
-            lookIntoOneFlat(&j,data[i],nb_value);
-            if ((j-array->indexStart[i][nb_flat]) > SEUIL_H) {
-                array->indexStop[i][nb_flat] = j;
-                nb_flat++;
-            }
+
         }        
         if (array->indexStart[i][nb_flat-1] > array->indexStop[i][nb_flat-1]) {
             array->indexStart[i].resize(nb_flat-1);
@@ -92,12 +103,13 @@ void analyse::meanVarianceValuesByFlat(double **data,Stat *res, Flat *indexArray
             }
             size += (indexArray->indexStop[i][j] - indexArray->indexStart[i][j] + 1);
         }
+        if ( size > 0 ) {
+            res->sum[i] = res->sum[i] / size;
+            res->var[i] = res->var[i] / size;
 
-        res->sum[i] = res->sum[i] / size;
-        res->var[i] = res->var[i] / size;
-
-        res->var[i] -= (res->sum[i] * res->sum[i]);
-        res->length[i] = size;
+            res->var[i] -= (res->sum[i] * res->sum[i]);
+            res->length[i] = size;
+        }
     }
 
 }
@@ -128,12 +140,11 @@ void analyse::lengthOfEachFlat(int i, QVector<double>meanValues, Flat *indexArra
 }
 
 void analyse::lengthGoodFlats(QVector<QVector<double> >meanValues, Flat *indexArray) {
-   statistique STAT;
    int i, nb_element_R;
    double moy=0.0,var=0.0,*quartile=(double*)calloc(4,sizeof(double)),d=0.0,f=0.0;
 
    for (i=0;i<4;i++) {
-        STAT.moustach(meanValues[i].data(),meanValues[i].count(),&d,&f,&moy,&var,&nb_element_R,quartile);
+        stat.moustach(meanValues[i].data(),meanValues[i].count(),&d,&f,&moy,&var,&nb_element_R,quartile);
         lengthOfEachFlat(i,meanValues[i],indexArray,d,f);
    }
    free(quartile);
@@ -151,6 +162,8 @@ QVector<double> analyse::getTruthfulIndex(double lengthFlats[4], int lengthTotal
 QVector<double> analyse::getWeightByFlat(double **data, int nb_valeur, Flat *indexArray, Stat *statArray) {
     QVector<QVector<double> >meanValues;
     QVector<double> confidence(4), res(2);
+    double moy=0,var=0,d,f,quar[4];
+    int nbR=0;
 
     indexArray->indexStart.resize(4);
     indexArray->indexStop.resize(4);
@@ -159,10 +172,15 @@ QVector<double> analyse::getWeightByFlat(double **data, int nb_valeur, Flat *ind
     meanValues = meanValuesEachFlat(data,indexArray);
     lengthGoodFlats(meanValues,indexArray);
     meanVarianceValuesByFlat(data,statArray,indexArray);
-    confidence = getTruthfulIndex(statArray->length,nb_valeur);
+
+    stat.moustach(data[3],nb_valeur,&d,&f,&moy,&var,&nbR,quar);
+    confidence = getTruthfulIndex(statArray->length,nbR);
 
     //Confidence of a Flat
-    double indexFlat = confidence[3] / statArray->var[3];
+    double indexFlat = 0;
+    if ( statArray->var[3] > 0 ) {
+        indexFlat = confidence[3] / statArray->var[3];
+    }
     //Confidence of a Curve
     double indexCurve = double(nb_valeur)/1000;
     //Confidence of Weight
@@ -172,4 +190,20 @@ QVector<double> analyse::getWeightByFlat(double **data, int nb_valeur, Flat *ind
     res[0] = statArray->sum[3];
 
     return res;
+}
+
+bool analyse::isGoodFlat(QVector<double> caractCourbe, double **data, int size) {
+
+    double mean = 0, var = 0;
+    double weight = caractCourbe[0];
+    double indiceConf = caractCourbe[1];
+
+    stat.getStatData(data[3],size,&mean,&var);
+
+    if ((weight > mean/2) && indiceConf >= 3 ) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }

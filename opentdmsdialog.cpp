@@ -24,6 +24,9 @@ openTDMSDialog::openTDMSDialog(QWidget *parent) :
     this->progressDialog = new QProgressDialog();
     connect(&this->futureWatcher,SIGNAL(finished()),this,SLOT(slot_finished()));
     connect(&this->futureWatcher,SIGNAL(finished()),this->progressDialog,SLOT(cancel()));
+
+    //Can we draw the curve ?
+    authorization = false;
 }
 
 openTDMSDialog::~openTDMSDialog()
@@ -34,9 +37,6 @@ openTDMSDialog::~openTDMSDialog()
 
 void openTDMSDialog::on_pushButton_clicked()
 {
-    //QFileDialog dialog(this);
-    //dialog.setFileMode(QFileDialog::Directory);
-    //dialog.setViewMode(QFileDialog::Detail);
     directory = QFileDialog::getExistingDirectory(this,tr("Choisissez un dossier contenant des fichiers TDMS"), directory,QFileDialog::DontUseNativeDialog);
     ui->label_3->clear();
     ui->label_3->setText(QString("Répertoire sélectionné : " + directory));
@@ -71,8 +71,8 @@ void openTDMSDialog::on_pushButton_2_clicked()
     filenameRead = dest + "/Temp/" + hour + "-00-00 plateau" + balanceChoice + ".txt";
     QDir erreur(QString(dest+"/Temp"));
     QString tdmsname = hour + "-00-00 plateau" + balanceChoice + ".txt";
-
-    QFuture<int> future = QtConcurrent::run(&this->files,&OpenTdms::creation_txt,directory,dest,date,hour,balanceChoice);
+    QString infoFile = date + " " + hour + " " + balanceChoice;
+    QFuture<int> future = QtConcurrent::run(&this->files,&OpenTdms::creation_txt,directory,dest,infoFile,-1);
     this->futureWatcher.setFuture(future);
     error = future.result();
     if (error == 2) {
@@ -83,7 +83,7 @@ void openTDMSDialog::on_pushButton_2_clicked()
             this->progressDialog->setMaximum(0);
             this->progressDialog->setWindowModality(Qt::WindowModal);
             this->progressDialog->exec();
-
+            authorization = true;
             close();
         }else {
             QMessageBox::critical(this,"Erreur","Erreur TDMS");
@@ -124,4 +124,8 @@ void openTDMSDialog::on_calendarWidget_selectionChanged()
        ui->label_4->setText("TDMS introuvable");
        ui->label_4->setStyleSheet("QLabel {color: red;}");
    }
+}
+
+bool openTDMSDialog::getAuthorizationDraw() {
+    return authorization;
 }

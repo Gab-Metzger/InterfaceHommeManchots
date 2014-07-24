@@ -7,13 +7,11 @@
 QT       += core gui
 QT += sql
 CONFIG += QWT
-CONFIG += release
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = InterfaceHommeManchot
 TEMPLATE = app
-
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -23,7 +21,8 @@ SOURCES += main.cpp\
     analyse.cpp \
     opentdmsdialog.cpp \
     ouverturemanchot.cpp \
-    parcoursmanchots.cpp
+    database.cpp \
+    resultat.cpp
 
 HEADERS  += mainwindow.h \
     lecture_fichiers.h \
@@ -32,15 +31,17 @@ HEADERS  += mainwindow.h \
     analyse.h \
     opentdmsdialog.h \
     ouverturemanchot.h \
-    parcoursmanchots.h
+    database.h \
+    resultat.h
 
 FORMS    += mainwindow.ui \
     histodialog.ui \
     opentdmsdialog.ui \
-    ouverturemanchot.ui
+    ouverturemanchot.ui \
+    resultat.ui
 
 DEPENDPATH += C:\qwt-6.1.0\include\
 INCLUDEPATH += C:\qwt-6.1.0\src\
 LIBS += -LC:\qwt-6.1.0\lib\qwt.dll
-LIBS += -LC:\qwt-6.1.0\lib\qwt5.dll
+LIBS += -LC:\qwt-6.1.0\lib\qwtd.dll
 LIBS += -L"$$_PRO_FILE_PWD_\libs" -lOpenTdms

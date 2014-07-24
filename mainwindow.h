@@ -19,6 +19,7 @@
 #include "analyse.h"
 #include "opentdmsdialog.h"
 #include "ouverturemanchot.h"
+#include "resultat.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,7 +40,7 @@ private:
     int nb_valeur;
     int selection[4];
     int nb_passage;
-    int sizeFlat;
+    int sizeFlat[4];
     char cas;
     QString filename;
     QwtPlot *plot;
@@ -47,8 +48,12 @@ private:
     QwtPlotCurve **curveFlat[4];
     QPen *color [4];
     histoDialog *histoWindow;
+    OuvertureManchot *omWindow;
+    Resultat *resultWindow;
     int errorOpenFile;
     bool existFlat;
+    analyse anal;
+
     /**
      * @brief affiche
      * @param i
@@ -82,7 +87,7 @@ private:
      * @param indexArray
      * @param statArray
      */
-    void traceFlat(Flat *indexArray, Stat *statArray);
+    void traceFlat(Flat *indexArray);
 
 private slots:
     void on_actionOuvrir_triggered();
@@ -102,6 +107,7 @@ private slots:
     void on_actionOuvrir_manchot_triggered();
     void on_checkBox_2_clicked();
     void on_checkBox_clicked();
+    void on_actionR_sultat_triggered();
 };
 
 #endif // MAINWINDOW_H

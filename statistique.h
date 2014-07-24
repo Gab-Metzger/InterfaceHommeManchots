@@ -23,17 +23,11 @@ public:
      * @param quartile
      */
     void moustach(double* data, int nb_element, double *d, double *f, double *moy, double*var, int* nb_element_R, double quartile[3]);
+    void getStatData(double *data, int numDataValues, double* moy, double* var);
 
 private:
-    /**
-     * @brief getSumData
-     * @param data
-     * @param numDataValues
-     * @param moy
-     * @param var
-     * @return
-     */
-    double* getSumData(double **data, int numDataValues, double* moy, double* var);
+
+
     /**
      * @brief getNewData
      * @param data

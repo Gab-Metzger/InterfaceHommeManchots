@@ -1,7 +1,5 @@
 #ifndef ANALYSE_H
 #define ANALYSE_H
-#define SEUIL_V 0.3
-#define SEUIL_H 20
 
 #include <QVector>
 #include <QDebug>
@@ -18,6 +16,8 @@
 #include <qwt_scale_widget.h>
 #include <qwt_plot_layout.h>
 
+#define SEUIL_V 0.3
+#define SEUIL_H 50
 
 
 typedef struct indexTab {
@@ -35,6 +35,7 @@ class analyse
 {
 public:
     analyse();
+     bool isGoodFlat(QVector<double> caractCourbe, double **data, int size);
     /**
      * @brief detectAllFlat
      * @param data
@@ -95,6 +96,7 @@ private:
     QwtPlot *plot;
     QwtPlotCurve *curve[4];
     QwtPlotCurve *curveWeight[4];
+    statistique stat;
     /**
      * @brief detectOneFlat
      * @param indice
@@ -108,7 +110,7 @@ private:
      * @param data
      * @param nb_value
      */
-    void lookIntoOneFlat(int *index, double *data, int nb_value);
+    void lookIntoOneFlat(int *index, int start, double *data, int nb_value);
 
 };
 
