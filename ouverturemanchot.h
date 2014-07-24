@@ -29,7 +29,9 @@ private:
     Ui::OuvertureManchot *ui;
     OpenTdms files;
     QString filenameRead;
+    QString directory;
     bool authorization;
+    QString readRegister();
 };
 
 #endif // OUVERTUREMANCHOT_H

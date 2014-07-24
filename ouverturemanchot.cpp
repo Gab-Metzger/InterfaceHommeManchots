@@ -7,6 +7,7 @@ OuvertureManchot::OuvertureManchot(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->lineEdit->setFocus();
+    directory = readRegister();
     authorization = false;
 }
 
@@ -20,7 +21,7 @@ void OuvertureManchot::on_submitButton_clicked()
     int idManchot = ui->lineEdit->text().toInt();
     QString dest = QDir::homePath() + "/.ihmanchots";
 
-    files.Manchot_txt(QString("C:\\Users\\Gabriel\\Documents\\Courbe_Pesee\\2011-2012"),dest,idManchot);
+    files.Manchot_txt(directory,dest,idManchot);
     filenameRead = dest+"/Temp/Manchot"+QString::number(idManchot)+".txt";
     authorization = true;
     close();
@@ -37,4 +38,12 @@ bool OuvertureManchot::getAuthorizationDraw() {
 void OuvertureManchot::on_cancelButton_clicked()
 {
     close();
+}
+
+QString OuvertureManchot::readRegister() {
+    QString destination;
+    QSettings settings("METZGER","IHManchots");
+
+    destination = settings.value("OpenTDMSDialog/destinationPath").toString();
+    return destination;
 }

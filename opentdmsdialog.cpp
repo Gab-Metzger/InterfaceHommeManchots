@@ -6,9 +6,8 @@ openTDMSDialog::openTDMSDialog(QWidget *parent) :
     ui(new Ui::openTDMSDialog)
 {
     ui->setupUi(this);
-    directory = readRegister();
-    ui->label_3->setToolTip(directory);
-    ui->label_3->setText(QString(ui->label_3->text() + directory));
+    directory = readRegister();  
+    ui->label_3->setText(QString("Répertoire sélectionné : " + directory));
 
     QDir calendarDayExist(directory);
     ui->label_4->clear();
@@ -31,15 +30,8 @@ openTDMSDialog::openTDMSDialog(QWidget *parent) :
 
 openTDMSDialog::~openTDMSDialog()
 {
-    writeRegister(directory);
+    writeRegister();
     delete ui;
-}
-
-void openTDMSDialog::on_pushButton_clicked()
-{
-    directory = QFileDialog::getExistingDirectory(this,tr("Choisissez un dossier contenant des fichiers TDMS"), directory,QFileDialog::DontUseNativeDialog);
-    ui->label_3->clear();
-    ui->label_3->setText(QString("Répertoire sélectionné : " + directory));
 }
 
 QString openTDMSDialog::getFileName() {
@@ -102,9 +94,8 @@ QString openTDMSDialog::readRegister() {
     return destination;
 }
 
-void openTDMSDialog::writeRegister(QString path) {
+void openTDMSDialog::writeRegister() {
     QSettings settings("METZGER","IHManchots");
-    settings.setValue("OpenTDMSDialog/destinationPath",path);
     settings.setValue("OpenTDMSDialog/selectedDate",ui->calendarWidget->selectedDate());
 }
 

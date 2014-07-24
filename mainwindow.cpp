@@ -460,3 +460,9 @@ void MainWindow::on_actionR_sultat_triggered()
     resultWindow = new Resultat(filename);
     resultWindow->exec();
 }
+
+void MainWindow::on_actionOptions_triggered()
+{
+    paramWindow = new Parametres();
+    paramWindow->exec();
+}

@@ -20,6 +20,7 @@
 #include "opentdmsdialog.h"
 #include "ouverturemanchot.h"
 #include "resultat.h"
+#include "parametres.h"
 
 namespace Ui {
 class MainWindow;
@@ -50,6 +51,7 @@ private:
     histoDialog *histoWindow;
     OuvertureManchot *omWindow;
     Resultat *resultWindow;
+    Parametres *paramWindow;
     int errorOpenFile;
     bool existFlat;
     analyse anal;
@@ -108,6 +110,7 @@ private slots:
     void on_checkBox_2_clicked();
     void on_checkBox_clicked();
     void on_actionR_sultat_triggered();
+    void on_actionOptions_triggered();
 };
 
 #endif // MAINWINDOW_H
