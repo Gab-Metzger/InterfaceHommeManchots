@@ -4,6 +4,11 @@
 #include <QDialog>
 #include <QSettings>
 #include <QFileDialog>
+#include <QVariantList>
+#include <QList>
+#include <QSqlDatabase>
+#include <QMessageBox>
+#include "database.h"
 
 namespace Ui {
 class Parametres;
@@ -24,11 +29,14 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    //void on_pushButton_4_clicked();
+
 private:
     Ui::Parametres *ui;
     QString directory;
-    QString readRegister();
-    void writeRegister(QString path);
+    QString readDirectoryRegister();
+    QList<QString> readDbRegister();
+    void writeRegister(QString path, QVariantList list);
 };
 
 #endif // PARAMETRES_H

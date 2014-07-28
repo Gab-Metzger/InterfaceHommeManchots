@@ -5,6 +5,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    QDir dir(QString(QDir::homePath()+"/.ihmanchots/Temp"));
+    if ( dir.exists() ) {
+        dir.removeRecursively();
+    }
+
     ui->setupUi(this);
     readSettings();
     plot  = new QwtPlot(this);
@@ -25,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balance1->setStyleSheet("QCheckBox {color: blue;}");
     ui->balance2->setStyleSheet("QCheckBox {color: green;}");
     ui->balance3->setStyleSheet("QCheckBox {color: red;}");
+    ui->actionR_sultat->setDisabled(true);
 
     existFlat = false;
     omWindow = new OuvertureManchot(this);
@@ -42,6 +48,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOuvrir_triggered()
 {
+    ui->actionR_sultat->setDisabled(true);
     ui->spinBox->setValue(0);
     openTDMSDialog ot;
     ot.setAttribute(Qt::WA_QuitOnClose);
@@ -87,10 +94,11 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
             plot->setAxisScale(QwtPlot::xBottom,minInt,maxInt);
             ui->spinBox_2->setMaximum(maxInt);
             ui->spinBox_3->setMaximum(maxInt);
-            ui->spinBox_3->setValue(maxInt);
+            ui->spinBox_3->setValue(maxInt); 
         }
 
         ui->spinBox->setRange(0,nb_passage-1);
+
 
         ui->balance1->setChecked(1);
         ui->balance2->setChecked(1);
@@ -433,9 +441,11 @@ void MainWindow::traceFlat(Flat *indexArray) {
 
 void MainWindow::on_actionOuvrir_manchot_triggered()
 {
+   ui->actionR_sultat->setEnabled(true);
    omWindow->exec();
    filename = omWindow->getFileName();
    if (omWindow->getAuthorizationDraw()) {
+       ui->spinBox->setValue(0);
        tracer(0,0,-1);
        this->setWindowTitle(filename);
    }

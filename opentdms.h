@@ -13,7 +13,9 @@
 #include <math.h>
 #include <QtWidgets/QMessageBox>
 
-
+#include "passage.h"
+#include "tdms.h"
+#include "detections.h"
 
 class OPENTDMSSHARED_EXPORT OpenTdms
 {
@@ -26,7 +28,12 @@ public:
      * @param trajet_dest
      */
     int creation_txt(QString chemin_Dossier_tdms, QString chemin_Dossier_arrive,QString infoFichier,int idManchot);
-    void Manchot_txt(QString cheminDossierTdms,QString cheminDossierArrive,int idManchot);
+    int Manchot_txt(QList<QString> infoDb,QString cheminDossierTdms, QString cheminDossierArrive, int idManchot);
+
+    Passage passage;
+    tdms TDMS;
+    Detections dt;
+
 private:
     void FichierTdmsErreurDossier(QString chemin_fichier, QString nomfichier, QString cause);
     /**

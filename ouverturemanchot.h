@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QDebug>
+#include <QMessageBox>
 #include "opentdms.h"
 #include "database.h"
 
@@ -31,7 +32,8 @@ private:
     QString filenameRead;
     QString directory;
     bool authorization;
-    QString readRegister();
+    QString readDirectoryRegister();
+    QList<QString> readDbRegister();
 };
 
 #endif // OUVERTUREMANCHOT_H

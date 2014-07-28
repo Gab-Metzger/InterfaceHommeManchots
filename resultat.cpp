@@ -6,7 +6,26 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     ui(new Ui::Resultat)
 {
     ui->setupUi(this);
+
+    histoPlot  = new QwtPlot(this);
+    histoPlot->setTitle("Histogramme Erreurs");
+
+    curvePlot = new QwtPlot(this);
+    curvePlot->setTitle("Evolution de la Masse");
+
+    curve= new QwtPlotCurve();
+    histo = new QwtPlotHistogram("Histo");
+    curveT= new QwtPlotMarker();
+
+    ui->horizontalLayout->addWidget(histoPlot);
+    ui->horizontalLayout->addWidget(curvePlot);
+
     filename = fichierManchot;
+
+    histoPlot->setVisible(false);
+    curvePlot->setVisible(true);
+
+    caractManchot(-1, filename);
 }
 
 Resultat::~Resultat()
@@ -15,7 +34,7 @@ Resultat::~Resultat()
 }
 
 void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
-    int i=0,nb_val=0,nb_passage=0,numValidated=0;
+    int i=0,nb_val=0,nb_passage=0,numValidated=0,tailleMax = 50;
     double k=0,max=0,min=0;
     double** dataCourbe,*smoothData;
     char cas;
@@ -23,9 +42,12 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
     QString dateTime;
     double moy=0,var=0,errorTot=0;
     QVector<double> Error(2000,0.0);
+    double* masse[2];
+    masse[0] = (double*)calloc(50,sizeof(double));
+    masse[1] = (double*)calloc(50,sizeof(double));
+
     Stat* statArray = new Stat();
     Flat* indexArray = new Flat();
-
 
     while (lect.lire_fichier(fichierManchot,&dataCourbe,&nb_val,&nb_passage,&cas,i,&dateTime,caseTab) != 2 ) {
         i++;
@@ -47,6 +69,9 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
 
         if (  anal.isGoodFlat(caractCourbe, dataCourbe,nb_val) ) {
             double error = (caractCourbe[0] - poidsTheo) / poidsTheo;
+
+            masse[0][numValidated] = numValidated;
+            masse[1][numValidated] = caractCourbe[0];
 
             moy += caractCourbe[1]*caractCourbe[0];
             var += caractCourbe[1]*caractCourbe[0]*caractCourbe[0];
@@ -72,6 +97,10 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
              if ( caractSelected[0] > 0 ) {
                  double error = (caractSelected[0] - poidsTheo) / poidsTheo;
 
+                 masse[0][numValidated] = numValidated;
+                 masse[1][numValidated] = caractSelected[0];
+
+
                  moy += caractSelected[1]*caractSelected[0];
                  var += caractSelected[1]*caractSelected[0]*caractSelected[0];
 
@@ -85,41 +114,86 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
                  if ( error < min ) {min = error;}
              }
         }
+
+        if( numValidated > (tailleMax-2) ) {
+            qDebug() << numValidated;
+            tailleMax += 50;
+            masse[0]= (double*)realloc(masse[0],tailleMax * sizeof(double));
+            masse[1]= (double*)realloc(masse[1],tailleMax * sizeof(double));
+        }
     }
     moy = moy/k;
-    var = var/k - moy*moy;
+    var = var/k - (moy*moy);
     errorTot =  100*errorTot/k;
 
-    ui->label->setText(QString(ui->label->text()+QString::number(moy)));
-    ui->label_3->setText(QString(ui->label_3->text()+QString::number(sqrt(var))));
-    ui->label_2->setText(QString(ui->label_2->text()+QString::number(errorTot)+" %"));
-    ui->label_6->setText(QString(ui->label_6->text()+QString::number(numValidated)+"/" + QString::number(i)));
+    ui->label->setText("Nombre de courbes traitées: "+QString::number(moy));
+    ui->label_6->setText("Masse moyenne: "+QString::number(numValidated)+"/" + QString::number(i));
+    ui->label_3->setText("Ecart-type: "+QString::number(sqrt(var)));
 
-    histoPlot  = new QwtPlot(this);
-    histoPlot->setTitle("Histogramme 2");
-    histo = new QwtPlotHistogram("Histo");
-    ui->horizontalLayout->addWidget(histoPlot);
+    if ( poidsTheo != -1 ) {
+        ui->label_2->setText("Erreur totale: "+QString::number(errorTot)+" %");
 
-    histo->setYAxis( QwtPlot::yLeft );
-    histo->setXAxis( QwtPlot::xBottom );
-    histo->attach(histoPlot);
+        QVector<QwtIntervalSample> errorSample(2000);
 
-    QVector<QwtIntervalSample> errorSample(2000);
+        int fin = floor(1000*max);
+        int debut = floor(1000*min);
 
-    int fin = floor(1000*max);
-    int debut = floor(1000*min);
+        for(i = debut ;i<fin;i++) {
+            errorSample.append(QwtIntervalSample(Error[i+1000]/k, double(i/10.0) , double(i/10.0) + 0.1 ));
+        }
 
-    for(i = debut ;i<fin;i++) {
-        errorSample.append(QwtIntervalSample(Error[i+1000]/k, double(i/10.0) , double(i/10.0) + 0.1 ));
+        histo->setData(new QwtIntervalSeriesData(errorSample));
+        histo->attach(histoPlot);
+
+        histoPlot->updateAxes();
+        histoPlot->replot();
+        if ( histoPlot->isVisible() ) {
+            histoPlot->show();
+        }
+
+
+
+        curveT->setYValue(ui->lineEdit->text().toDouble());
+        curveT->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);
+        curveT->setLineStyle(QwtPlotMarker::HLine);
+        curveT->setLinePen(Qt::green);
+
+        curveT->attach(curvePlot);
+    }
+    if (numValidated > 0 ) {
+        curve->setRawSamples(masse[0],masse[1],numValidated);
+        curve->attach(curvePlot);
     }
 
-    histo->setData(new QwtIntervalSeriesData(errorSample));
     Error.clear();
 
-    histoPlot->show();
+    curvePlot->updateAxes();
+    curvePlot->replot();
+    if ( curvePlot->isVisible() ) {
+        curvePlot->show();
+    }
 }
 
 void Resultat::on_pushButton_clicked()
 {
-    caractManchot(ui->lineEdit->text().toDouble(), filename);
+    QTimer *timer = new QTimer;
+    if ( !ui->lineEdit->text().isEmpty() ) {
+        caractManchot(ui->lineEdit->text().toDouble(), filename);
+    }
+    else {
+        caractManchot(-1, filename);
+    }
+    timer->start(500);
+}
+
+void Resultat::on_pushButton_2_clicked()
+{
+    histoPlot->setVisible(false);
+    curvePlot->setVisible(true);
+}
+
+void Resultat::on_pushButton_3_clicked()
+{
+    histoPlot->setVisible(true);
+    curvePlot->setVisible(false);
 }

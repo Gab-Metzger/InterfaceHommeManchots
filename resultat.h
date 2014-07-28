@@ -14,6 +14,7 @@
 #include <qwt_plot_layout.h>
 #include <qwt_plot_histogram.h>
 #include <histodialog.h>
+#include <QTimer>
 
 namespace Ui {
 class Resultat;
@@ -31,12 +32,21 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
+
 private:
     Ui::Resultat *ui;
     lecture_fichiers lect;
     analyse anal;
 
     QwtPlot *histoPlot;
+    QwtPlot *curvePlot;
+
+    QwtPlotCurve *curve;
+    QwtPlotMarker *curveT;
+
     QwtPlotHistogram *histo;
     QString filename;
 };

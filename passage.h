@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <math.h>
 #include <QtConcurrent/QtConcurrentRun>
-#include <QMutex>
 #include "bruit.h"
 #include "detections.h"
 #include <QFile>
@@ -54,10 +53,9 @@ public:
      * @param heure
      * @return
      */
-    int detection_passage(double** data, int nb, QString titre_valeur,QString date,int heure, double nb_cas[],int idManchot);
+    int detection_passage(double** data, int nb, QString titre_valeur,QString date,int heure,int plateau, double nb_cas[],int idManchot);
     bruit Bruit;
     Detections Dt;
-    QMutex ecriture;
 
 private:
     /**

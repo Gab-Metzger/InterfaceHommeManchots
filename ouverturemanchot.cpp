@@ -7,7 +7,7 @@ OuvertureManchot::OuvertureManchot(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->lineEdit->setFocus();
-    directory = readRegister();
+    directory = readDirectoryRegister();
     authorization = false;
 }
 
@@ -19,12 +19,22 @@ OuvertureManchot::~OuvertureManchot()
 void OuvertureManchot::on_submitButton_clicked()
 {
     int idManchot = ui->lineEdit->text().toInt();
+    int nbResult;
     QString dest = QDir::homePath() + "/.ihmanchots";
-
-    files.Manchot_txt(directory,dest,idManchot);
+    QList<QString> dbCredentials = readDbRegister();
+    nbResult = files.Manchot_txt(dbCredentials,directory,dest,idManchot);
     filenameRead = dest+"/Temp/Manchot"+QString::number(idManchot)+".txt";
-    authorization = true;
-    close();
+    qDebug() << nbResult;
+    if(nbResult == 1) {
+       authorization = true;
+       close();
+    }
+    else if (nbResult == -2) {
+        QMessageBox::critical(this,"BDD","Erreur de connexion à la base de donnée.\nVeuillez entrer vos identifiants dans le menu Outils->Options...");
+    }
+    else {
+        QMessageBox::critical(this,"Erreur","Il n'y a pas de courbes pour ce manchot.");
+    }
 }
 
 QString OuvertureManchot::getFileName() {
@@ -40,10 +50,23 @@ void OuvertureManchot::on_cancelButton_clicked()
     close();
 }
 
-QString OuvertureManchot::readRegister() {
+QString OuvertureManchot::readDirectoryRegister() {
     QString destination;
     QSettings settings("METZGER","IHManchots");
 
     destination = settings.value("OpenTDMSDialog/destinationPath").toString();
     return destination;
+}
+
+QList<QString> OuvertureManchot::readDbRegister() {
+    QVariantList reading;
+    QList<QString> db;
+    QSettings settings("METZGER","IHManchots");
+
+    reading = settings.value("Database/dbCredentials").toList();
+    foreach(QVariant v, reading) {
+        db << v.toString();
+    }
+
+    return db;
 }

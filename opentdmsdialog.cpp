@@ -62,6 +62,7 @@ void openTDMSDialog::on_pushButton_2_clicked()
     }
     filenameRead = dest + "/Temp/" + hour + "-00-00 plateau" + balanceChoice + ".txt";
     QDir erreur(QString(dest+"/Temp"));
+    erreur.removeRecursively();
     QString tdmsname = hour + "-00-00 plateau" + balanceChoice + ".txt";
     QString infoFile = date + " " + hour + " " + balanceChoice;
     QFuture<int> future = QtConcurrent::run(&this->files,&OpenTdms::creation_txt,directory,dest,infoFile,-1);
