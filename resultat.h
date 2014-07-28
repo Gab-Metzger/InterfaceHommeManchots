@@ -48,7 +48,7 @@ private:
     QwtPlotMarker *curveT;
 
     QwtPlotHistogram *histo;
-    QString filename;
+    QString fileName;
 };
 
 #endif // RESULTAT_H
