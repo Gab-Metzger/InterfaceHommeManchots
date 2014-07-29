@@ -17,7 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="tdmsFileLabel">
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -31,12 +31,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="tdmsFileLineEdit"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="searchButton">
          <property name="text">
           <string>Parcourir...</string>
          </property>
@@ -58,7 +58,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="databaseTitleLabel">
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -74,48 +74,48 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="domainNameLabel">
          <property name="text">
           <string>Nom de domaine</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="domainNameLineEdit"/>
        </item>
        <item>
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="databaseNameLabel">
          <property name="text">
           <string>Base de donnée</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_3"/>
+        <widget class="QLineEdit" name="databaseNameLineEdit"/>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="userNameLabel">
          <property name="text">
           <string>Nom utilisateur</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_4"/>
+        <widget class="QLineEdit" name="userNameLineEdit"/>
        </item>
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="passwordLabel">
          <property name="text">
           <string>Mot de passe</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_5">
+        <widget class="QLineEdit" name="passwordLineEdit">
          <property name="echoMode">
           <enum>QLineEdit::PasswordEchoOnEdit</enum>
          </property>
@@ -139,14 +139,14 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="saveButton">
          <property name="text">
           <string>Enregistrer</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="cancelButton">
          <property name="text">
           <string>Annuler</string>
          </property>
