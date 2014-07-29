@@ -10,7 +10,6 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
     char lecture_v[300];
     int taille=0,k=0;
     char date[12],heure[13];
-    qDebug() << "ici";
 
     errno_t err = fopen_s(&g, titre.toStdString().c_str(), "r+");
     if (err)
@@ -59,7 +58,6 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
     }
     *nb_passage = validate + 1;
 
-    qDebug() << "sortie";
     fclose(g);
     return data;
 }
