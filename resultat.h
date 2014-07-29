@@ -36,6 +36,10 @@ private slots:
 
     void on_histoGraphButton_clicked();
 
+    void on_comboBox_2_currentIndexChanged(int index);
+
+    void on_comboBox_currentIndexChanged(int index);
+
 private:
     Ui::Resultat *ui;
     lecture_fichiers lect;
@@ -49,8 +53,9 @@ private:
 
     QwtPlotHistogram *histo;
     QString fileName;
-    int compar(QString arg1,QString arg2);
-    void tri_Bulle(QVector<QString> *arg,double **masse);
+    bool init;
+    int compar(QString arg1,QString arg2,int nb);
+    void tri_Bulle(QStringList *arg, double **masse);
 };
 
 #endif // RESULTAT_H

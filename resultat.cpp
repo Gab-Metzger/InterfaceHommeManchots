@@ -25,7 +25,9 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     histoPlot->setVisible(false);
     curvePlot->setVisible(true);
 
+    init = true;
     caractManchot(-1, fileName);
+    init = false;
 }
 
 Resultat::~Resultat()
@@ -33,17 +35,17 @@ Resultat::~Resultat()
     delete ui;
 }
 
-int Resultat::compar(QString arg1,QString arg2) {
+int Resultat::compar(QString arg1,QString arg2,int nb) {
     int information[2][7];
     int res=1,i=0;
 
     sscanf(qPrintable(arg1),"%d-%d-%d %d-%d-%d-%d\n",&information[0][0],&information[0][1],&information[0][2],&information[0][3],&information[0][4],&information[0][5],&information[0][6]);
     sscanf(qPrintable(arg2),"%d-%d-%d %d-%d-%d-%d\n",&information[1][0],&information[1][1],&information[1][2],&information[1][3],&information[1][4],&information[1][5],&information[1][6]);
 
-    while ( (i < 7) && (information[0][i] == information[1][i]) ) {
+    while ( ( i < (3 + nb*4) ) && (information[0][i] == information[1][i]) ) {
         i++;
     }
-    if ( i == 7 ) {
+    if ( i == (3 + nb*4)  ) {
         res = 0;
     }
     else if ( information[0][i] < information[1][i] ) {
@@ -53,10 +55,10 @@ int Resultat::compar(QString arg1,QString arg2) {
     return res;
 }
 
-void Resultat::tri_Bulle(QVector<QString> *arg,double **masse) {
+void Resultat::tri_Bulle(QStringList *arg,double **masse) {
     int i=0,l=0,n=arg->length();
     while( i < n ) {
-        while ( (l < (n-i-1) ) && ( compar((*arg)[i+l],(*arg)[i+l+1]) > 0 ) ) {
+        while ( (l < (n-i-1) ) && ( compar((*arg)[i+l],(*arg)[i+l+1],1) > 0 ) ) {
             QString tmp = (*arg)[i+l];
             double tmpD = masse[1][i+l+1];
 
@@ -82,7 +84,7 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
     QString dateTime;
     double moy=0,var=0,errorTot=0;
     QVector<double> Error(2000,0.0);
-    QVector<QString> TabDate(50,"");
+    QStringList TabDate,comboList;
     double* masse[2];
     masse[0] = (double*)calloc(50,sizeof(double));
     masse[1] = (double*)calloc(50,sizeof(double));
@@ -114,7 +116,7 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
             masse[0][numValidated] = numValidated;
             masse[1][numValidated] = caractCourbe[0];
 
-            TabDate[numValidated] = dateTime.mid(0,dateTime.length()-4);
+            TabDate << dateTime.mid(0,dateTime.length()-4);
 
             moy += caractCourbe[1]*caractCourbe[0];
             var += caractCourbe[1]*caractCourbe[0]*caractCourbe[0];
@@ -128,7 +130,6 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
 
             if ( error > max ) {max = error;}
             if ( error < min ) {min = error;}
-
         }
         else {
              histoDialog *diag = new histoDialog();
@@ -144,7 +145,7 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
                  masse[0][numValidated] = numValidated;
                  masse[1][numValidated] = caractSelected[0];
 
-                 TabDate[numValidated] = dateTime.mid(0,dateTime.length()-4);
+                 TabDate << dateTime.mid(0,dateTime.length()-4);
 
                  moy += caractSelected[1]*caractSelected[0];
                  var += caractSelected[1]*caractSelected[0]*caractSelected[0];
@@ -166,8 +167,23 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
             masse[1]= (double*)realloc(masse[1],tailleMax * sizeof(double));
         }
     }
-    TabDate.resize(numValidated);
+
+
     tri_Bulle(&TabDate,masse);
+    if ( init ) {
+        comboList << TabDate[0].mid(0,10);
+        int l=1;
+        for(int i =0;i<TabDate.length();i++) {
+            if ( compar(TabDate[i],comboList[l-1],0) != 0 ) {
+                comboList << TabDate[i].mid(0,10);
+                l++;
+            }
+        }
+
+        ui->comboBox->addItems(comboList);
+        ui->comboBox_2->addItems(comboList);
+        ui->comboBox_2->setCurrentIndex(l-1);
+    }
 
     moy = moy/k;
     var = var/k - (moy*moy);
@@ -241,4 +257,18 @@ void Resultat::on_histoGraphButton_clicked()
 {
     histoPlot->setVisible(true);
     curvePlot->setVisible(false);
+}
+
+void Resultat::on_comboBox_2_currentIndexChanged(int index)
+{
+    if ( index < ui->comboBox->currentIndex() ) {
+        ui->comboBox_2->setCurrentIndex(ui->comboBox->currentIndex());
+    }
+}
+
+void Resultat::on_comboBox_currentIndexChanged(int index)
+{
+    if ( index > ui->comboBox_2->currentIndex()) {
+        ui->comboBox_2->setCurrentIndex(index);
+    }
 }
