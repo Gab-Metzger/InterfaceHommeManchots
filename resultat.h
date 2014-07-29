@@ -49,7 +49,8 @@ private:
 
     QwtPlotHistogram *histo;
     QString fileName;
-    //int compar(const void* a,const void* b);
+    int compar(QString arg1,QString arg2);
+    void tri_Bulle(QVector<QString> *arg,double **masse);
 };
 
 #endif // RESULTAT_H
