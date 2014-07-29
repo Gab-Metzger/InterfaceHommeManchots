@@ -125,8 +125,8 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
     var = var/k - (moy*moy);
     errorTot =  100*errorTot/k;
 
-    ui->label->setText("Nombre de courbes traitées: "+QString::number(moy));
-    ui->label_6->setText("Masse moyenne: "+QString::number(numValidated)+"/" + QString::number(i));
+    ui->label->setText("Masse moyenne: "+QString::number(moy));
+    ui->label_6->setText("Nombre de courbes traitées: "+QString::number(numValidated)+"/" + QString::number(i));
     ui->label_3->setText("Ecart-type: "+QString::number(sqrt(var)));
 
     if ( poidsTheo != -1 ) {

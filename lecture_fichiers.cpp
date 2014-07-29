@@ -11,7 +11,6 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
     int taille=0,k=0;
     char date[12],heure[13];
 
-
     errno_t err = fopen_s(&g, titre.toStdString().c_str(), "r+");
     if (err)
         printf_s("The file fscanf.out was not opened \n");
@@ -59,7 +58,6 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
     }
     *nb_passage = validate + 1;
 
-
     fclose(g);
     return data;
 }
@@ -74,7 +72,7 @@ int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur
     int n = titre.length();
 
     chemin_ref.append(titre);
-    chemin_ref.replace(n-14,7,"reference");
+    chemin_ref.replace("Manchot","reference");
 
     (*data)=allocation_m(chemin_ref,nb_passage,&num_R_passage,cas,dateTime,caseTab);
 
