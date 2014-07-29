@@ -49,6 +49,7 @@ private:
 
     QwtPlotHistogram *histo;
     QString fileName;
+    //int compar(const void* a,const void* b);
 };
 
 #endif // RESULTAT_H
