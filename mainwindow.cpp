@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     plot->setAxisTitle(QwtPlot::xBottom,"millisecondes");
     plot->setAxisTitle(QwtPlot::yLeft,"poids (kg)");
     plot->setCanvasBackground(* new QBrush(Qt::white));
+
     for(int j = 0 ;j<4;j++) {
         curve[j]= new QwtPlotCurve();
     }

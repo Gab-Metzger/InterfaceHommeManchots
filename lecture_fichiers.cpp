@@ -69,10 +69,12 @@ int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur
     char* lecture = (char*)malloc(3 * (sizeof(double)+sizeof(char)));
     QString chemin_ref="";
     int res = 0;
-    int n = titre.length();
 
     chemin_ref.append(titre);
-    chemin_ref.replace("Manchot","reference");
+
+    if ( chemin_ref == chemin_ref.replace("Manchot","reference") ) {
+        chemin_ref.replace("plateau","reference");
+    }
 
     (*data)=allocation_m(chemin_ref,nb_passage,&num_R_passage,cas,dateTime,caseTab);
 
