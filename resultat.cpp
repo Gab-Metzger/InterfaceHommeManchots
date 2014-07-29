@@ -33,7 +33,7 @@ Resultat::~Resultat()
     delete ui;
 }
 
-int compar(QString arg1,QString arg2) {
+int Resultat::compar(QString arg1,QString arg2) {
     int information[2][7];
     int res=1,i=0;
 
@@ -53,7 +53,7 @@ int compar(QString arg1,QString arg2) {
     return res;
 }
 
-void tri_Bulle(QVector<QString> *arg,double **masse) {
+void Resultat::tri_Bulle(QVector<QString> *arg,double **masse) {
     int i=0,l=0,n=arg->length();
     while( i < n ) {
         while ( (l < (n-i-1) ) && ( compar((*arg)[i+l],(*arg)[i+l+1]) > 0 ) ) {
