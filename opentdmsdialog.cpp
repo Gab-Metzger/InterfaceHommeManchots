@@ -7,17 +7,17 @@ openTDMSDialog::openTDMSDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     directory = readRegister();  
-    ui->label_3->setText(QString("Répertoire sélectionné : " + directory));
+    ui->tdmsFileLabel->setText(QString("Répertoire sélectionné : " + directory));
 
     QDir calendarDayExist(directory);
-    ui->label_4->clear();
+    ui->isTdmsLabel->clear();
     if(calendarDayExist.exists(ui->calendarWidget->selectedDate().toString("yyyy-MM-dd"))) {
-         ui->label_4->setText("TDMS présent");
-         ui->label_4->setStyleSheet("QLabel {color: green;}");
+         ui->isTdmsLabel->setText("TDMS présent");
+         ui->isTdmsLabel->setStyleSheet("QLabel {color: green;}");
     }
     else {
-        ui->label_4->setText("TDMS introuvable");
-        ui->label_4->setStyleSheet("QLabel {color: red;}");
+        ui->isTdmsLabel->setText("TDMS introuvable");
+        ui->isTdmsLabel->setStyleSheet("QLabel {color: red;}");
     }
 
     this->progressDialog = new QProgressDialog();
@@ -38,7 +38,7 @@ QString openTDMSDialog::getFileName() {
     return filenameRead;
 }
 
-void openTDMSDialog::on_pushButton_2_clicked()
+void openTDMSDialog::on_submitButton_clicked()
 {    
     QString balanceChoice, date;
     QString hour;
@@ -51,14 +51,14 @@ void openTDMSDialog::on_pushButton_2_clicked()
         hour = "0"+hour;
     }
 
-    if(ui->radioButton->isChecked()) {
-        balanceChoice = ui->radioButton->text();
+    if(ui->plate123RadioButton->isChecked()) {
+        balanceChoice = ui->plate123RadioButton->text();
     }
-    else if (ui->radioButton_2->isChecked()) {
-        balanceChoice = ui->radioButton_2->text();
+    else if (ui->plate456RadioButton->isChecked()) {
+        balanceChoice = ui->plate456RadioButton->text();
     }
     else{
-        balanceChoice = ui->radioButton_3->text();
+        balanceChoice = ui->plate789RadioButton->text();
     }
     filenameRead = dest + "/Temp/" + hour + "-00-00 plateau" + balanceChoice + ".txt";
     QDir erreur(QString(dest+"/Temp"));
@@ -107,14 +107,14 @@ void openTDMSDialog::slot_finished() {
 void openTDMSDialog::on_calendarWidget_selectionChanged()
 {
    QDir calendarDayExist(directory);
-   ui->label_4->clear();
+   ui->isTdmsLabel->clear();
    if(calendarDayExist.exists(ui->calendarWidget->selectedDate().toString("yyyy-MM-dd"))) {
-        ui->label_4->setText("TDMS présent");
-        ui->label_4->setStyleSheet("QLabel {color: green;}");
+        ui->isTdmsLabel->setText("TDMS présent");
+        ui->isTdmsLabel->setStyleSheet("QLabel {color: green;}");
    }
    else {
-       ui->label_4->setText("TDMS introuvable");
-       ui->label_4->setStyleSheet("QLabel {color: red;}");
+       ui->isTdmsLabel->setText("TDMS introuvable");
+       ui->isTdmsLabel->setStyleSheet("QLabel {color: red;}");
    }
 }
 

@@ -25,7 +25,7 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="5" column="3">
-        <widget class="QCheckBox" name="checkBox_2">
+        <widget class="QCheckBox" name="simpleCase">
          <property name="text">
           <string>Cas simples</string>
          </property>
@@ -35,7 +35,7 @@
         </widget>
        </item>
        <item row="5" column="5">
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="complexCase">
          <property name="text">
           <string>Cas complexes</string>
          </property>
@@ -58,7 +58,7 @@
         </spacer>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="choosePassageLabel">
          <property name="font">
           <font>
            <pointsize>13</pointsize>
@@ -70,24 +70,24 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QSpinBox" name="spinBox"/>
+        <widget class="QSpinBox" name="passageSpinBox"/>
        </item>
        <item row="3" column="5" colspan="2">
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="resetButton">
          <property name="text">
           <string>Réinitialiser</string>
          </property>
         </widget>
        </item>
        <item row="1" column="5">
-        <widget class="QSpinBox" name="spinBox_2">
+        <widget class="QSpinBox" name="intervalMinSpinBox">
          <property name="maximum">
           <number>360000</number>
          </property>
         </widget>
        </item>
        <item row="1" column="3">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="chooseIntervalLabel">
          <property name="font">
           <font>
            <pointsize>13</pointsize>
@@ -99,7 +99,7 @@
         </widget>
        </item>
        <item row="1" column="6">
-        <widget class="QSpinBox" name="spinBox_3">
+        <widget class="QSpinBox" name="intervalMaxSpinBox">
          <property name="maximum">
           <number>360000</number>
          </property>
@@ -113,7 +113,7 @@
         </widget>
        </item>
        <item row="3" column="3">
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="drawButton">
          <property name="text">
           <string>Tracer</string>
          </property>
@@ -134,14 +134,14 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QCheckBox" name="sommebalance">
+        <widget class="QCheckBox" name="sommeBalance">
          <property name="text">
           <string>Somme des balances</string>
          </property>
         </widget>
        </item>
        <item row="5" column="6">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="algoResultLabel">
          <property name="styleSheet">
           <string notr="true">QLabel {text-align: center;}</string>
          </property>

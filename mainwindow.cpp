@@ -24,10 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plotLayout->addWidget(plot);
     ui->actionAlgorithme_de_plats->setDisabled(true);
     ui->actionAfficher->setDisabled(true);
-    ui->spinBox->setDisabled(true);
-    ui->pushButton_2->setDisabled(true);
-    ui->pushButton->setDisabled(true);
-    ui->label_3->setStyleSheet("QCheckBox {color: red;}");
+    ui->passageSpinBox->setDisabled(true);
+    ui->drawButton->setDisabled(true);
+    ui->resetButton->setDisabled(true);
+    ui->algoResultLabel->setStyleSheet("QCheckBox {color: red;}");
     ui->balance1->setStyleSheet("QCheckBox {color: blue;}");
     ui->balance2->setStyleSheet("QCheckBox {color: green;}");
     ui->balance3->setStyleSheet("QCheckBox {color: red;}");
@@ -50,7 +50,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionOuvrir_triggered()
 {
     ui->actionR_sultat->setDisabled(true);
-    ui->spinBox->setValue(0);
+    ui->passageSpinBox->setValue(0);
     openTDMSDialog ot;
     ot.setAttribute(Qt::WA_QuitOnClose);
     ot.exec();
@@ -80,36 +80,36 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
     QString output = "";
     bool caseTab[2];
 
-    caseTab[0] = ui->checkBox_2->isChecked();
-    caseTab[1] = ui->checkBox->isChecked();
+    caseTab[0] = ui->simpleCase->isChecked();
+    caseTab[1] = ui->complexCase->isChecked();
 
     errorOpenFile = FICHIERS.lire_fichier(filename,&l_data,&nb_valeur,&nb_passage,&cas,num_passage,&dateTime,caseTab);
     if (errorOpenFile != 1 ) {
         if (maxInt == -1) {
             plot->setAxisScale(QwtPlot::xBottom,minInt,nb_valeur);
-            ui->spinBox_2->setMaximum(nb_valeur);
-            ui->spinBox_3->setMaximum(nb_valeur);
-            ui->spinBox_3->setValue(nb_valeur);
+            ui->intervalMinSpinBox->setMaximum(nb_valeur);
+            ui->intervalMaxSpinBox->setMaximum(nb_valeur);
+            ui->intervalMaxSpinBox->setValue(nb_valeur);
         }
         else {
             plot->setAxisScale(QwtPlot::xBottom,minInt,maxInt);
-            ui->spinBox_2->setMaximum(maxInt);
-            ui->spinBox_3->setMaximum(maxInt);
-            ui->spinBox_3->setValue(maxInt); 
+            ui->intervalMinSpinBox->setMaximum(maxInt);
+            ui->intervalMaxSpinBox->setMaximum(maxInt);
+            ui->intervalMaxSpinBox->setValue(maxInt);
         }
 
-        ui->spinBox->setRange(0,nb_passage-1);
+        ui->passageSpinBox->setRange(0,nb_passage-1);
 
 
         ui->balance1->setChecked(1);
         ui->balance2->setChecked(1);
         ui->balance3->setChecked(1);
-        ui->sommebalance->setChecked(0);
+        ui->sommeBalance->setChecked(0);
         ui->actionAlgorithme_de_plats->setEnabled(true);
         ui->actionAfficher->setEnabled(true);
-        ui->spinBox->setEnabled(true);
-        ui->pushButton_2->setEnabled(true);
-        ui->pushButton->setEnabled(true);
+        ui->passageSpinBox->setEnabled(true);
+        ui->drawButton->setEnabled(true);
+        ui->resetButton->setEnabled(true);
 
         selection[0] = 1;
         selection[1] = 1;
@@ -183,7 +183,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
 
         if (  anal.isGoodFlat(weightWithConfidence, dataInterval,(max-minInt)) ) {
             output = "Algorithme plat:\nMasse : " + QString::number(weightWithConfidence[0]) + " kg\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
-            ui->label_3->setText(output);
+            ui->algoResultLabel->setText(output);
         }
         else{
             histoDialog *diag = new histoDialog();
@@ -195,11 +195,11 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
 
             if ( caractSelected[0] > 0 ) {
                 output = "Algorithme histogramme:\nMasse : " + QString::number(caractSelected[0]) + " kg\nIndice de confiance : " + QString::number(caractSelected[1]);
-                ui->label_3->setText(output);
+                ui->algoResultLabel->setText(output);
             }
             else {
                 output = "Courbe non traitée\n";
-                ui->label_3->setText(output);
+                ui->algoResultLabel->setText(output);
             }
         }
 
@@ -218,7 +218,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
     }
 }
 
-void MainWindow::on_spinBox_valueChanged(int arg1)
+void MainWindow::on_passageSpinBox_valueChanged(int arg1)
 {
     tracer(arg1,0,-1);
     if(existFlat) {
@@ -276,7 +276,7 @@ void MainWindow::on_balance3_clicked(bool checked)
     }
 }
 
-void MainWindow::on_sommebalance_clicked(bool checked)
+void MainWindow::on_sommeBalance_clicked(bool checked)
 {
     affiche(3,checked);
     if(!checked && existFlat) {
@@ -296,9 +296,9 @@ void MainWindow::on_actionAfficher_triggered()
 
 }
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_drawButton_clicked()
 {
-    tracer(ui->spinBox->value(),ui->spinBox_2->value(),ui->spinBox_3->value());
+    tracer(ui->passageSpinBox->value(),ui->intervalMinSpinBox->value(),ui->intervalMaxSpinBox->value());
 }
 
 void MainWindow::writeSettings() {
@@ -325,7 +325,7 @@ void MainWindow::on_actionAlgorithme_de_plats_triggered()
     weightWithConfidence = ANALYSE.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
 
     output = "Poids : " + QString::number(weightWithConfidence[0]) + "\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
-    ui->label_3->setText(output);
+    ui->algoResultLabel->setText(output);
 
     traceFlat(indexArray);
 }
@@ -350,9 +350,9 @@ int MainWindow::maxArray(QVector<double> index, QVector<double> meanWeight) {
     return max;
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_resetButton_clicked()
 {
-    tracer(ui->spinBox->value(),0,-1);
+    tracer(ui->passageSpinBox->value(),0,-1);
     if(existFlat) {
         for(int i=0;i<4;i++) {
             for(int j=0;j<sizeFlat[i];j++) {
@@ -395,7 +395,7 @@ void MainWindow::on_actionEnregistrer_triggered()
 
 void MainWindow::on_actionLisser_la_courbe_triggered()
 {
-    tracer(ui->spinBox->value(),0,-1,1);
+    tracer(ui->passageSpinBox->value(),0,-1,1);
 }
 
 void MainWindow::traceFlat(Flat *indexArray) {
@@ -430,7 +430,7 @@ void MainWindow::traceFlat(Flat *indexArray) {
             if (ui->balance3->isChecked() && (i==2)) {
                curveFlat[i][j]->attach(plot);
             }
-            if (ui->sommebalance->isChecked() && (i==3)) {
+            if (ui->sommeBalance->isChecked() && (i==3)) {
                curveFlat[i][j]->attach(plot);
             }
         }
@@ -447,23 +447,23 @@ void MainWindow::on_actionOuvrir_manchot_triggered()
    omWindow->exec();
    filename = omWindow->getFileName();
    if (omWindow->getAuthorizationDraw()) {
-       ui->spinBox->setValue(0);
+       ui->passageSpinBox->setValue(0);
        tracer(0,0,-1);
        this->setWindowTitle(filename);
    }
 }
 
-void MainWindow::on_checkBox_2_clicked()
+void MainWindow::on_simpleCase_clicked()
 {
     // Affichage Cas simples
     tracer(0,0,-1);
-    ui->spinBox->setValue(0);
+    ui->passageSpinBox->setValue(0);
 }
 
-void MainWindow::on_checkBox_clicked()
+void MainWindow::on_complexCase_clicked()
 {
     // Affichage Cas complexes
-    ui->spinBox->setValue(0);
+    ui->passageSpinBox->setValue(0);
     tracer(0,0,-1);
 }
 
