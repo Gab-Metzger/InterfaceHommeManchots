@@ -125,12 +125,12 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
     var = var/k - (moy*moy);
     errorTot =  100*errorTot/k;
 
-    ui->label->setText("Masse moyenne: "+QString::number(moy));
-    ui->label_6->setText("Nombre de courbes traitées: "+QString::number(numValidated)+"/" + QString::number(i));
-    ui->label_3->setText("Ecart-type: "+QString::number(sqrt(var)));
+    ui->meanWeightLabel->setText("Masse moyenne: "+QString::number(moy));
+    ui->nbCurveLabel->setText("Nombre de courbes traitées: "+QString::number(numValidated)+"/" + QString::number(i));
+    ui->deviationLabel->setText("Ecart-type: "+QString::number(sqrt(var)));
 
     if ( poidsTheo != -1 ) {
-        ui->label_2->setText("Erreur totale: "+QString::number(errorTot)+" %");
+        ui->totalErrorLabel->setText("Erreur totale: "+QString::number(errorTot)+" %");
 
         QVector<QwtIntervalSample> errorSample(2000);
 
@@ -152,7 +152,7 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
 
 
 
-        curveT->setYValue(ui->lineEdit->text().toDouble());
+        curveT->setYValue(ui->theoLineEdit->text().toDouble());
         curveT->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);
         curveT->setLineStyle(QwtPlotMarker::HLine);
         curveT->setLinePen(Qt::green);
@@ -173,11 +173,11 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
     }
 }
 
-void Resultat::on_pushButton_clicked()
+void Resultat::on_theoValidateButton_clicked()
 {
     QTimer *timer = new QTimer;
-    if ( !ui->lineEdit->text().isEmpty() ) {
-        caractManchot(ui->lineEdit->text().toDouble(), fileName);
+    if ( !ui->theoLineEdit->text().isEmpty() ) {
+        caractManchot(ui->theoLineEdit->text().toDouble(), fileName);
     }
     else {
         caractManchot(-1, fileName);
@@ -185,13 +185,13 @@ void Resultat::on_pushButton_clicked()
     timer->start(500);
 }
 
-void Resultat::on_pushButton_2_clicked()
+void Resultat::on_weightGraphButton_clicked()
 {
     histoPlot->setVisible(false);
     curvePlot->setVisible(true);
 }
 
-void Resultat::on_pushButton_3_clicked()
+void Resultat::on_histoGraphButton_clicked()
 {
     histoPlot->setVisible(true);
     curvePlot->setVisible(false);

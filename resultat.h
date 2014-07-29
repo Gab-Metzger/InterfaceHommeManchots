@@ -30,11 +30,11 @@ public:
     void caractManchot(double poidsTheo, QString fichierManchot);
 
 private slots:
-    void on_pushButton_clicked();
+    void on_theoValidateButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_weightGraphButton_clicked();
 
-    void on_pushButton_3_clicked();
+    void on_histoGraphButton_clicked();
 
 private:
     Ui::Resultat *ui;
