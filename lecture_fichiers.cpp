@@ -8,7 +8,7 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
 {
     FILE *g;
     char lecture_v[300];
-    int taille=0,k=0;
+    int taille=0,k=0,plateau=0;
     char date[12],heure[13];
 
     errno_t err = fopen_s(&g, titre.toStdString().c_str(), "r+");
@@ -21,9 +21,10 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
     int validate=-1;
 
     while ( fgets(lecture_v,300,g) && ( validate != (*num_passage + 1) ) ) {
-        sscanf(lecture_v,"%s %s %d %c\n",date,heure,&taille,cas);
 
-        *dateTime=QString("").append(date).append(" ").append(heure);
+        sscanf(lecture_v,"%s %s %d %d %c\n",date,heure,&plateau,&taille,cas);
+
+        *dateTime=QString("").append(date).append(" ").append(heure).append(" "+QString::number(plateau));
 
 
         if ( k == *num_passage && caseTab[0] && caseTab[1] ){

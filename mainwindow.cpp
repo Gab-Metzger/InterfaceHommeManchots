@@ -121,13 +121,14 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
         }
 
         char date[13];
-        sscanf(qPrintable(dateTime),"%s %d-%d-%d-%d",date,&h,&m,&s,&ms);
+        int plateau=0;
+        sscanf(qPrintable(dateTime),"%s %d-%d-%d-%d %d",date,&h,&m,&s,&ms,&plateau);
 
         if ( cas == 'c' ) {
-           sprintf(titre,"%s\n%d h %d m %d s %d ms\nCas complexe",date,h,m,s,ms);
+           sprintf(titre,"%s\n%d h %d m %d s %d ms\nPLateau %d\nCas complexe",date,h,m,s,ms,plateau);
         }
         else{
-           sprintf(titre,"%s\n%d h %d m %d s %d ms\nCas simple",date,h,m,s,ms);
+           sprintf(titre,"%s\n%d h %d m %d s %d ms\nPlateau %d\nCas simple",date,h,m,s,ms,plateau);
         }
 
         plot->setTitle(titre);
