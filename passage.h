@@ -38,6 +38,10 @@ typedef struct infoCourbe{
 typedef struct Manchot {
     QVector<QVector<int> > tableau;
     int IndiceCourant;
+
+    QString date;
+    int heure;
+    int plateau;
 }Manchot;
 
 class Passage
@@ -86,7 +90,7 @@ private:
      * @param k
      * @param InformationAnalyse
      */
-    void ecriture_fichier(QString titre_valeur,Manchot *Adelie, double** data,Analyse *InfoAnalyse,int indiceFinPicPrec[3],Pic RefPic[3],int heure,QString date);
+    void ecriture_fichier(QString titre_valeur,Manchot *Adelie, double** data,Analyse *InfoAnalyse,int indiceFinPicPrec[3],Pic RefPic[3]);
     /**
      * @brief indice_min
      * @param index_0
