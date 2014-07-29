@@ -94,21 +94,21 @@ private:
 private slots:
     void on_actionOuvrir_triggered();
     void on_actionQuitter_triggered();
-    void on_spinBox_valueChanged(int arg1);
+    void on_passageSpinBox_valueChanged(int arg1);
     void on_balance1_clicked(bool checked);
     void on_balance2_clicked(bool checked);
     void on_balance3_clicked(bool checked);
-    void on_sommebalance_clicked(bool checked);
+    void on_sommeBalance_clicked(bool checked);
     void on_actionAfficher_triggered();
-    void on_pushButton_2_clicked();
+    void on_drawButton_clicked();
     void on_actionAlgorithme_de_plats_triggered();
     void on_actionA_propos_triggered();
-    void on_pushButton_clicked();
+    void on_resetButton_clicked();
     void on_actionEnregistrer_triggered();
     void on_actionLisser_la_courbe_triggered();
     void on_actionOuvrir_manchot_triggered();
-    void on_checkBox_2_clicked();
-    void on_checkBox_clicked();
+    void on_simpleCase_clicked();
+    void on_complexCase_clicked();
     void on_actionR_sultat_triggered();
     void on_actionOptions_triggered();
 };

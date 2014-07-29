@@ -35,7 +35,7 @@ public slots:
     void slot_finished();
 
 private slots:
-    void on_pushButton_2_clicked();
+    void on_submitButton_clicked();
 
     void on_calendarWidget_selectionChanged();
 
