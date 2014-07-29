@@ -23,8 +23,7 @@ SOURCES += main.cpp\
     ouverturemanchot.cpp \
     database.cpp \
     resultat.cpp \
-    parametres.cpp \
-    weightwindow.cpp
+    parametres.cpp
 
 HEADERS  += mainwindow.h \
     lecture_fichiers.h \
@@ -35,16 +34,14 @@ HEADERS  += mainwindow.h \
     ouverturemanchot.h \
     database.h \
     resultat.h \
-    parametres.h \
-    weightwindow.h
+    parametres.h
 
 FORMS    += mainwindow.ui \
     histodialog.ui \
     opentdmsdialog.ui \
     ouverturemanchot.ui \
     resultat.ui \
-    parametres.ui \
-    weightwindow.ui
+    parametres.ui
 
 DEPENDPATH += C:\qwt-6.1.0\include\
 INCLUDEPATH += C:\qwt-6.1.0\src\
