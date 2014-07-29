@@ -20,12 +20,12 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     ui->horizontalLayout->addWidget(histoPlot);
     ui->horizontalLayout->addWidget(curvePlot);
 
-    filename = fichierManchot;
+    fileName = fichierManchot;
 
     histoPlot->setVisible(false);
     curvePlot->setVisible(true);
 
-    caractManchot(-1, filename);
+    caractManchot(-1, fileName);
 }
 
 Resultat::~Resultat()
@@ -116,7 +116,6 @@ void Resultat::caractManchot(double poidsTheo, QString fichierManchot) {
         }
 
         if( numValidated > (tailleMax-2) ) {
-            qDebug() << numValidated;
             tailleMax += 50;
             masse[0]= (double*)realloc(masse[0],tailleMax * sizeof(double));
             masse[1]= (double*)realloc(masse[1],tailleMax * sizeof(double));
@@ -178,10 +177,10 @@ void Resultat::on_pushButton_clicked()
 {
     QTimer *timer = new QTimer;
     if ( !ui->lineEdit->text().isEmpty() ) {
-        caractManchot(ui->lineEdit->text().toDouble(), filename);
+        caractManchot(ui->lineEdit->text().toDouble(), fileName);
     }
     else {
-        caractManchot(-1, filename);
+        caractManchot(-1, fileName);
     }
     timer->start(500);
 }

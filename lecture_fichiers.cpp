@@ -50,8 +50,6 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
           k++;
         }
     }
-    qDebug() << validate;
-     qDebug() << *nb_passage;
     if ( validate != (*num_passage + 1) ) {
         validate = -1;
         *num_passage = -1;
