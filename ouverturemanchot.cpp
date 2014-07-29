@@ -6,7 +6,7 @@ OuvertureManchot::OuvertureManchot(QWidget *parent) :
     ui(new Ui::OuvertureManchot)
 {
     ui->setupUi(this);
-    ui->lineEdit->setFocus();
+    ui->idLineEdit->setFocus();
     directory = readDirectoryRegister();
     authorization = false;
 }
@@ -18,13 +18,14 @@ OuvertureManchot::~OuvertureManchot()
 
 void OuvertureManchot::on_submitButton_clicked()
 {
-    int idManchot = ui->lineEdit->text().toInt();
+    int idManchot = ui->idLineEdit->text().toInt();
     int nbResult;
     QString dest = QDir::homePath() + "/.ihmanchots";
     QList<QString> dbCredentials = readDbRegister();
     nbResult = files.Manchot_txt(dbCredentials,directory,dest,idManchot);
+    qDebug() << "ok";
     filenameRead = dest+"/Temp/Manchot"+QString::number(idManchot)+".txt";
-    qDebug() << nbResult;
+
     if(nbResult == 1) {
        authorization = true;
        close();
