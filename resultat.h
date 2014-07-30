@@ -20,7 +20,21 @@ typedef struct statInfo{
     double moy;
     double var;
     double size;
+    double *dataY;
+    double *dataX;
+    int nbVal;
 }statInfo;
+
+typedef struct histoMasseInfo{
+    double errorTot;
+    double min;
+    double max;
+    double error;
+    QVector<double> Error;
+    double k;
+    statInfo statistique;
+}histoMasseInfo;
+
 
 namespace Ui {
 class Resultat;
@@ -50,8 +64,9 @@ private:
     Ui::Resultat *ui;
     lecture_fichiers lect;
     analyse anal;
-    double* masse[2];
-    QVector< QList<double> > caractPlat,caractHisto;
+    double* masse[3];
+    QVector< QList<double> > caractInfo;
+    QStringList dateInfo;
 
     QwtPlot *histoPlot;
     QwtPlot *curvePlot;
@@ -61,17 +76,23 @@ private:
 
     QwtPlotHistogram *histo;
     QString fileName;
-    bool init;
+    double *tmpX,*tmpY;
+
+    int nbPassage;
 
     int compar(QString arg1,QString arg2,int nb);
     void tri_Bulle(QStringList *arg, double **masse);
 
-    void traceHisto(double poidsTheo);
-    void traceCourbe(int i,statInfo statistique,double numValidated);
+    void traceHistoMasse(double poidsTheo, QStringList periode1);
+    void traceCourbe(statInfo statistique);
 
     void initComboBox(QStringList TabDate);
     void lissageCourbe(double **dataCourbe, int nbVal);
-    void miseAJourCaract(QVector<double> caractSelected, statInfo *statistique, int* numValidated);
+    void miseAJourCaract(statInfo *statistique, int numValidated);
+    void initHistoMasse(double poidsTheo, histoMasseInfo *info, QVector<QStringList> periode);
+    statInfo initStatistique(int n);
+    histoMasseInfo initInfo(statInfo statistique);
+    void miseAJourPeriode();
 };
 
 #endif // RESULTAT_H

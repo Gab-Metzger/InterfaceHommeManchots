@@ -25,19 +25,33 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     histoPlot->setVisible(false);
     curvePlot->setVisible(true);
 
-    caractPlat.resize(2);
-    caractHisto.resize(2);
+    caractInfo.resize(2);
 
     caractManchot(fileName);
+    tmpX=NULL;
+    tmpY=NULL;
 }
 
 Resultat::~Resultat()
 {
     free(masse[0]);
     free(masse[1]);
-    caractPlat.clear();
-    caractHisto.clear();
+    free(masse[2]);
+    free(tmpX);
+    free(tmpY);
+    caractInfo.clear();
     delete ui;
+}
+
+statInfo Resultat::initStatistique(int n) {
+    statInfo statistique;
+    statistique.dataX = (double*)calloc(n,sizeof(double));
+    statistique.dataY = (double*)calloc(n,sizeof(double));
+    statistique.nbVal = 0;
+    statistique.moy = 0;
+    statistique.var = 0;
+    statistique.size = 0;
+    return statistique;
 }
 
 int Resultat::compar(QString arg1,QString arg2,int nb) {
@@ -78,20 +92,18 @@ void Resultat::tri_Bulle(QStringList *arg,double **masse) {
 }
 
 void Resultat::caractManchot(QString fichierManchot) {
-    int i=0,nbVal=0,nb_passage=0,numValidated=0,tailleMax = 50;
+    int i=0,nbVal=0,nb_passage=0,tailleMax = 50;
     double** dataCourbe;
     char cas;
     bool caseTab[2]={true,true};
     QString dateTime;
 
     QStringList TabDate;
-    statInfo statistique;
-    statistique.moy=0;
-    statistique.var=0;
-    statistique.size=0;
+    statInfo statistique=initStatistique(0);
 
     masse[0] = (double*)calloc(50,sizeof(double));
     masse[1] = (double*)calloc(50,sizeof(double));
+    masse[2] = (double*)calloc(50,sizeof(double));
 
     Stat* statArray = new Stat();
     Flat* indexArray = new Flat();
@@ -104,11 +116,18 @@ void Resultat::caractManchot(QString fichierManchot) {
 
         if (  anal.isGoodFlat(caractCourbe, dataCourbe,nbVal) ) {
 
-            caractPlat[0] << caractCourbe[0];
-            caractPlat[1] << caractCourbe[1];
+            caractInfo[0] << caractCourbe[0];
+            caractInfo[1] << caractCourbe[1];
+
+            dateInfo << dateTime.mid(0,10);
+
+            masse[0][statistique.nbVal] = statistique.nbVal;
+            masse[1][statistique.nbVal] = caractCourbe[0];
+            masse[2][statistique.nbVal] = caractCourbe[1];
+
             TabDate << dateTime.mid(0,dateTime.length()-4);
 
-            miseAJourCaract(caractCourbe,&statistique,&numValidated);
+            miseAJourCaract(&statistique,statistique.nbVal);
         }
         else {
              histoDialog *diag = new histoDialog();
@@ -120,34 +139,43 @@ void Resultat::caractManchot(QString fichierManchot) {
 
              if ( caractSelected[0] > 0 ) {
 
-                 caractHisto[0] << caractSelected[0];
-                 caractHisto[1] << caractSelected[1];
+                 caractInfo[0] << caractSelected[0];
+                 caractInfo[1] << caractSelected[1];
+
+                 dateInfo << dateTime.mid(0,10);
+
+                 masse[0][statistique.nbVal] = statistique.nbVal;
+                 masse[1][statistique.nbVal] = caractSelected[0];
+                 masse[2][statistique.nbVal] = caractSelected[1];
+
                  TabDate << dateTime.mid(0,dateTime.length()-4);
 
-                 miseAJourCaract(caractSelected,&statistique,&numValidated);
+                 miseAJourCaract(&statistique,statistique.nbVal);
              }
         }
 
-        if( numValidated > (tailleMax-2) ) {
+        if( statistique.nbVal > (tailleMax-2) ) {
             tailleMax += 50;
             masse[0]= (double*)realloc(masse[0],tailleMax * sizeof(double));
             masse[1]= (double*)realloc(masse[1],tailleMax * sizeof(double));
+            masse[2]= (double*)realloc(masse[2],tailleMax * sizeof(double));
         }
     }
 
     initComboBox(TabDate);
-    traceCourbe(i,statistique,numValidated);
+    statistique.dataX=masse[0];
+    statistique.dataY=masse[1];
+    nbPassage = i;
+    traceCourbe(statistique);
 }
 
-void Resultat::miseAJourCaract(QVector<double> caractSelected,statInfo *statistique,int* numValidated) {
-    masse[0][*numValidated] = *numValidated;
-    masse[1][*numValidated] = caractSelected[0];
+void Resultat::miseAJourCaract(statInfo *statistique,int numValidated) {
 
-    statistique->moy += caractSelected[1]*caractSelected[0];
-    statistique->var += caractSelected[1]*caractSelected[0]*caractSelected[0];
+    statistique->moy += masse[2][numValidated] * masse[1][numValidated];
+    statistique->var += masse[2][numValidated] * masse[1][numValidated] * masse[1][numValidated];
 
-    statistique->size += caractSelected[1];
-    *numValidated = *numValidated + 1;
+    statistique->size += masse[2][numValidated];
+    statistique->nbVal += 1;
 }
 
 
@@ -188,17 +216,17 @@ void Resultat::initComboBox(QStringList TabDate) {
     ui->comboBox_2->setCurrentIndex(l-1);
 }
 
-void Resultat::traceCourbe(int i,statInfo statistique,double numValidated){
+void Resultat::traceCourbe(statInfo statistique){
 
     statistique.moy = statistique.moy/statistique.size;
     statistique.var = statistique.var/statistique.size - (statistique.moy*statistique.moy);
 
     ui->meanWeightLabel->setText("Masse moyenne: "+QString::number(statistique.moy));
-    ui->nbCurveLabel->setText("Nombre de courbes traitées: "+QString::number(numValidated)+"/" + QString::number(i));
+    ui->nbCurveLabel->setText("Nombre de courbes traitées: "+QString::number(statistique.nbVal)+"/" + QString::number(nbPassage));
     ui->deviationLabel->setText("Ecart-type: "+QString::number(sqrt(statistique.var)));
 
-    if (numValidated > 0 ) {
-        curve->setRawSamples(masse[0],masse[1],numValidated);
+    if (statistique.nbVal > 0 ) {
+        curve->setRawSamples(statistique.dataX,statistique.dataY,statistique.nbVal);
         curve->attach(curvePlot);
     }
 
@@ -209,75 +237,104 @@ void Resultat::traceCourbe(int i,statInfo statistique,double numValidated){
     }
 }
 
-void Resultat::traceHisto(double poidsTheo) {
-    QVector<double> Error(2000,0.0);
+void Resultat::initHistoMasse(double poidsTheo, histoMasseInfo *info,QVector< QStringList > periode) {
 
-    double error=0,errorTot=0,max=-100,min=100,k=0;
-    int i=0;
+    for(int i=0;i< caractInfo[0].length();i++) {
+        if ( ( compar(periode[0][0],periode[1][i],0) <= 0 ) && ( compar(periode[0][1],periode[1][i],0) >= 0 )  ) {
 
-    for(i=0;i< caractPlat[0].length();i++) {
-        error = (caractPlat[0][i] - poidsTheo) / poidsTheo;
+            info->statistique.dataX[info->statistique.nbVal] = info->statistique.nbVal;
+            info->statistique.dataY[info->statistique.nbVal] = masse[1][i];
+            miseAJourCaract(&info->statistique,i);
+            if ( poidsTheo != -1 ) {
+                info->error = (caractInfo[0][i] - poidsTheo) / poidsTheo;
 
-        Error[floor(1000*(error + 1) )] += caractPlat[1][i];
-        errorTot += caractPlat[1][i]*error;
+                info->Error[floor(1000*( info->error + 1) )] += caractInfo[1][i];
+                info->errorTot += caractInfo[1][i] * info->error;
 
-        k+= caractPlat[1][i];
-
-        if ( error > max ) {max = error;}
-        if ( error < min ) {min = error;}
+                if ( info->error > info->max ) {info->max = info->error;}
+                if ( info->error < info->min ) {info->min = info->error;}
+            }
+            info->k += caractInfo[1][i];
+        }
     }
-    for(i=0;i< caractHisto[0].length();i++) {
-        error = (caractHisto[0][i] - poidsTheo) / poidsTheo;
+}
 
-        Error[floor(1000*(error+1))] += caractHisto[1][i];
-        errorTot += caractHisto[1][i]*error;
+histoMasseInfo Resultat::initInfo(statInfo statistique){
+    histoMasseInfo info;
 
-        k+= caractHisto[1][i];
+    info.min=100;
+    info.max=-100;
+    info.k=0;
+    info.error=0;
+    info.errorTot=0;
+    info.statistique = statistique;
+    info.Error = *new QVector<double>(2000,0.0);
+    return info;
+}
 
-        if ( error > max ) {max = error;}
-        if ( error < min ) {min = error;}
+void Resultat::traceHistoMasse(double poidsTheo,QStringList periode1) {
+
+    int n= caractInfo[0].length();
+    statInfo statistique = initStatistique(n);
+    histoMasseInfo info = initInfo(statistique);
+
+    if ( tmpX != NULL ) {
+        free(tmpX);
+        tmpX = statistique.dataX;
+    }
+    if ( tmpY != NULL ) {
+        free(tmpY);
+        tmpY = statistique.dataY;
     }
 
-    errorTot = 100*errorTot/k;
+    QVector<QStringList> periode(2);
+    periode[0] = periode1;
+    periode[1] = dateInfo;
 
-    ui->totalErrorLabel->setText("Erreur totale: "+QString::number(errorTot)+" %");
+    initHistoMasse(poidsTheo,&info,periode);
+
+    info.errorTot = 100*info.errorTot/info.k;
+
+    ui->totalErrorLabel->setText("Erreur totale: "+QString::number(info.errorTot)+" %");
 
     QVector<QwtIntervalSample> errorSample(2000);
 
-    int fin = floor(1000*max);
-    int debut = floor(1000*min);
+    int fin = floor(1000*info.max);
+    int debut = floor(1000*info.min);
 
-    for(i = debut ;i<fin;i++) {
-        errorSample.append(QwtIntervalSample(Error[i+1000]/k, double(i/10.0) , double(i/10.0) + 0.1 ));
+    for(int i = debut ;i<fin;i++) {
+        errorSample.append(QwtIntervalSample(info.Error[i+1000]/info.k, double(i/10.0) , double(i/10.0) + 0.1 ));
     }
 
-    histo->setData(new QwtIntervalSeriesData(errorSample));
-    histo->attach(histoPlot);
+    if ( poidsTheo != -1 ) {
+        histo->setData(new QwtIntervalSeriesData(errorSample));
+        histo->attach(histoPlot);
 
-    histoPlot->updateAxes();
-    histoPlot->replot();
-    if ( histoPlot->isVisible() ) {
-        histoPlot->show();
+        histoPlot->updateAxes();
+        histoPlot->replot();
+        if ( histoPlot->isVisible() ) {
+            histoPlot->show();
+        }
+
+        curveT->setYValue(ui->theoLineEdit->text().toDouble());
+        curveT->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);
+        curveT->setLineStyle(QwtPlotMarker::HLine);
+        curveT->setLinePen(Qt::green);
+
+        curveT->attach(curvePlot);
+
+        curvePlot->replot();
     }
 
-    curveT->setYValue(ui->theoLineEdit->text().toDouble());
-    curveT->setLabelAlignment(Qt::AlignRight|Qt::AlignTop);
-    curveT->setLineStyle(QwtPlotMarker::HLine);
-    curveT->setLinePen(Qt::green);
-
-    curveT->attach(curvePlot);
-
-    curvePlot->replot();
-
-    Error.clear();
+    info.statistique.size=info.k;
+    traceCourbe(info.statistique);
+    info.Error.clear();
 }
 
 void Resultat::on_theoValidateButton_clicked()
 {
     QTimer *timer = new QTimer;
-    if ( !ui->theoLineEdit->text().isEmpty() ) {
-        traceHisto(ui->theoLineEdit->text().toDouble());
-    }
+    miseAJourPeriode();
     timer->start(500);
 }
 
@@ -298,6 +355,7 @@ void Resultat::on_comboBox_2_currentIndexChanged(int index)
     if ( index < ui->comboBox->currentIndex() ) {
         ui->comboBox_2->setCurrentIndex(ui->comboBox->currentIndex());
     }
+    miseAJourPeriode();
 }
 
 void Resultat::on_comboBox_currentIndexChanged(int index)
@@ -305,4 +363,17 @@ void Resultat::on_comboBox_currentIndexChanged(int index)
     if ( index > ui->comboBox_2->currentIndex()) {
         ui->comboBox_2->setCurrentIndex(index);
     }
+    miseAJourPeriode();
 }
+
+void Resultat::miseAJourPeriode() {
+    QStringList periode;
+    periode << ui->comboBox->currentText() << ui->comboBox_2->currentText();
+    if ( !ui->theoLineEdit->text().isEmpty() ) {
+        traceHistoMasse(ui->theoLineEdit->text().toDouble(),periode);
+    }
+    else {
+        traceHistoMasse(-1,periode);
+    }
+}
+

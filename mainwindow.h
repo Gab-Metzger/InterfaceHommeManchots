@@ -55,6 +55,7 @@ private:
     int errorOpenFile;
     bool existFlat;
     analyse anal;
+    double* tmp;
 
     /**
      * @brief affiche
