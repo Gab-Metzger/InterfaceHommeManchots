@@ -16,6 +16,12 @@
 #include <histodialog.h>
 #include <QTimer>
 
+typedef struct statInfo{
+    double moy;
+    double var;
+    double size;
+}statInfo;
+
 namespace Ui {
 class Resultat;
 }
@@ -56,9 +62,16 @@ private:
     QwtPlotHistogram *histo;
     QString fileName;
     bool init;
+
     int compar(QString arg1,QString arg2,int nb);
     void tri_Bulle(QStringList *arg, double **masse);
+
     void traceHisto(double poidsTheo);
+    void traceCourbe(int i,statInfo statistique,double numValidated);
+
+    void initComboBox(QStringList TabDate);
+    void lissageCourbe(double **dataCourbe, int nbVal);
+    void miseAJourCaract(QVector<double> caractSelected, statInfo *statistique, int* numValidated);
 };
 
 #endif // RESULTAT_H

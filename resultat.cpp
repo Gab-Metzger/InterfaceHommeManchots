@@ -78,15 +78,17 @@ void Resultat::tri_Bulle(QStringList *arg,double **masse) {
 }
 
 void Resultat::caractManchot(QString fichierManchot) {
-    int i=0,nb_val=0,nb_passage=0,numValidated=0,tailleMax = 50;
-    double k=0;
-    double** dataCourbe,*smoothData;
+    int i=0,nbVal=0,nb_passage=0,numValidated=0,tailleMax = 50;
+    double** dataCourbe;
     char cas;
     bool caseTab[2]={true,true};
     QString dateTime;
-    double moy=0,var=0;
 
-    QStringList TabDate,comboList;
+    QStringList TabDate;
+    statInfo statistique;
+    statistique.moy=0;
+    statistique.var=0;
+    statistique.size=0;
 
     masse[0] = (double*)calloc(50,sizeof(double));
     masse[1] = (double*)calloc(50,sizeof(double));
@@ -94,63 +96,35 @@ void Resultat::caractManchot(QString fichierManchot) {
     Stat* statArray = new Stat();
     Flat* indexArray = new Flat();
 
-    while (lect.lire_fichier(fichierManchot,&dataCourbe,&nb_val,&nb_passage,&cas,i,&dateTime,caseTab) != 2 ) {
+    while (lect.lire_fichier(fichierManchot,&dataCourbe,&nbVal,&nb_passage,&cas,i,&dateTime,caseTab) != 2 ) {
         i++;
-        for(int l=0;l< 4;l++) {
-            smoothData=(double*)calloc(nb_val,sizeof(double));
-            for(int k=0;k < nb_val;k++) {
-                if ((k == 0) || (k==(nb_val-1))) {
-                    smoothData[k] = dataCourbe[l][k];
-                }
-                else {
-                    smoothData[k] = (dataCourbe[l][k-1] + dataCourbe[l][k] + dataCourbe[l][k+1])/3;
-                }
-            }
-            memccpy(dataCourbe[l],smoothData,nb_val,sizeof(double));
-            free(smoothData);
-        }
+        lissageCourbe(dataCourbe,nbVal);
 
-        QVector<double> caractCourbe = anal.getWeightByFlat(dataCourbe,nb_val,indexArray,statArray);
+        QVector<double> caractCourbe = anal.getWeightByFlat(dataCourbe,nbVal,indexArray,statArray);
 
-        if (  anal.isGoodFlat(caractCourbe, dataCourbe,nb_val) ) {
-
-            masse[0][numValidated] = numValidated;
-            masse[1][numValidated] = caractCourbe[0];
-
-            TabDate << dateTime.mid(0,dateTime.length()-4);
-
-            moy += caractCourbe[1]*caractCourbe[0];
-            var += caractCourbe[1]*caractCourbe[0]*caractCourbe[0];
+        if (  anal.isGoodFlat(caractCourbe, dataCourbe,nbVal) ) {
 
             caractPlat[0] << caractCourbe[0];
             caractPlat[1] << caractCourbe[1];
+            TabDate << dateTime.mid(0,dateTime.length()-4);
 
-            k+=caractCourbe[1];
-            numValidated++;
-
+            miseAJourCaract(caractCourbe,&statistique,&numValidated);
         }
         else {
              histoDialog *diag = new histoDialog();
              double maxData[4];
 
-             diag->calculMax(dataCourbe,nb_val,maxData);
+             diag->calculMax(dataCourbe,nbVal,maxData);
              QVector<double> caractSelected(2);
-             caractSelected = diag->caractLoiNormal(maxData,dataCourbe,nb_val);
+             caractSelected = diag->caractLoiNormal(maxData,dataCourbe,nbVal);
 
              if ( caractSelected[0] > 0 ) {
-                 masse[0][numValidated] = numValidated;
-                 masse[1][numValidated] = caractSelected[0];
-
-                 TabDate << dateTime.mid(0,dateTime.length()-4);
-
-                 moy += caractSelected[1]*caractSelected[0];
-                 var += caractSelected[1]*caractSelected[0]*caractSelected[0];
 
                  caractHisto[0] << caractSelected[0];
                  caractHisto[1] << caractSelected[1];
+                 TabDate << dateTime.mid(0,dateTime.length()-4);
 
-                 k+=caractSelected[1];
-                 numValidated++;
+                 miseAJourCaract(caractSelected,&statistique,&numValidated);
              }
         }
 
@@ -160,6 +134,43 @@ void Resultat::caractManchot(QString fichierManchot) {
             masse[1]= (double*)realloc(masse[1],tailleMax * sizeof(double));
         }
     }
+
+    initComboBox(TabDate);
+    traceCourbe(i,statistique,numValidated);
+}
+
+void Resultat::miseAJourCaract(QVector<double> caractSelected,statInfo *statistique,int* numValidated) {
+    masse[0][*numValidated] = *numValidated;
+    masse[1][*numValidated] = caractSelected[0];
+
+    statistique->moy += caractSelected[1]*caractSelected[0];
+    statistique->var += caractSelected[1]*caractSelected[0]*caractSelected[0];
+
+    statistique->size += caractSelected[1];
+    *numValidated = *numValidated + 1;
+}
+
+
+void Resultat::lissageCourbe(double** dataCourbe,int nbVal){
+    double *smoothData;
+
+    for(int l=0;l< 4;l++) {
+        smoothData=(double*)calloc(nbVal,sizeof(double));
+        for(int k=0;k < nbVal;k++) {
+            if ((k == 0) || (k==(nbVal-1))) {
+                smoothData[k] = dataCourbe[l][k];
+            }
+            else {
+                smoothData[k] = (dataCourbe[l][k-1] + dataCourbe[l][k] + dataCourbe[l][k+1])/3;
+            }
+        }
+        memccpy(dataCourbe[l],smoothData,nbVal,sizeof(double));
+        free(smoothData);
+    }
+}
+
+void Resultat::initComboBox(QStringList TabDate) {
+    QStringList comboList;
 
     tri_Bulle(&TabDate,masse);
 
@@ -175,13 +186,16 @@ void Resultat::caractManchot(QString fichierManchot) {
     ui->comboBox->addItems(comboList);
     ui->comboBox_2->addItems(comboList);
     ui->comboBox_2->setCurrentIndex(l-1);
+}
 
-    moy = moy/k;
-    var = var/k - (moy*moy);
+void Resultat::traceCourbe(int i,statInfo statistique,double numValidated){
 
-    ui->meanWeightLabel->setText("Masse moyenne: "+QString::number(moy));
+    statistique.moy = statistique.moy/statistique.size;
+    statistique.var = statistique.var/statistique.size - (statistique.moy*statistique.moy);
+
+    ui->meanWeightLabel->setText("Masse moyenne: "+QString::number(statistique.moy));
     ui->nbCurveLabel->setText("Nombre de courbes traitées: "+QString::number(numValidated)+"/" + QString::number(i));
-    ui->deviationLabel->setText("Ecart-type: "+QString::number(sqrt(var)));
+    ui->deviationLabel->setText("Ecart-type: "+QString::number(sqrt(statistique.var)));
 
     if (numValidated > 0 ) {
         curve->setRawSamples(masse[0],masse[1],numValidated);
@@ -194,7 +208,6 @@ void Resultat::caractManchot(QString fichierManchot) {
         curvePlot->show();
     }
 }
-
 
 void Resultat::traceHisto(double poidsTheo) {
     QVector<double> Error(2000,0.0);
