@@ -27,7 +27,7 @@ class Resultat : public QDialog
 public:
     explicit Resultat(QString fichierManchot, QWidget *parent = 0);
     ~Resultat();
-    void caractManchot(double poidsTheo, QString fichierManchot);
+    void caractManchot(QString fichierManchot);
 
 private slots:
     void on_theoValidateButton_clicked();
@@ -44,6 +44,8 @@ private:
     Ui::Resultat *ui;
     lecture_fichiers lect;
     analyse anal;
+    double* masse[2];
+    QVector< QList<double> > caractPlat,caractHisto;
 
     QwtPlot *histoPlot;
     QwtPlot *curvePlot;
@@ -56,6 +58,7 @@ private:
     bool init;
     int compar(QString arg1,QString arg2,int nb);
     void tri_Bulle(QStringList *arg, double **masse);
+    void traceHisto(double poidsTheo);
 };
 
 #endif // RESULTAT_H
