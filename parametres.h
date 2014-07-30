@@ -29,12 +29,15 @@ private slots:
 
     void on_cancelButton_clicked();
 
+    void on_testConnexionButton_clicked();
+
 private:
     Ui::Parametres *ui;
     QString directory;
     QString readDirectoryRegister();
     QList<QString> readDbRegister();
     void writeRegister(QString path, QVariantList list);
+    void testConnexion();
 };
 
 #endif // PARAMETRES_H

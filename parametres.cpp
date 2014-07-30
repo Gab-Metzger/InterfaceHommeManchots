@@ -80,3 +80,24 @@ void Parametres::on_cancelButton_clicked()
 {
     close();
 }
+
+void Parametres::testConnexion() {
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL","testMysql");
+    db.setHostName(ui->domainNameLineEdit->text());
+    db.setDatabaseName(ui->databaseNameLineEdit->text());
+    db.setUserName(ui->userNameLineEdit->text());
+    db.setPassword(ui->passwordLineEdit->text());
+    if (db.open()) {
+        QMessageBox::information(this,"Test de la connexion à la base de donnée","Connexion réussie :)");
+    }
+    else {
+        QMessageBox::critical(this,"Test de la connexion à la base de donnée","Echec de la connexion (Veuillez vérifier vos identifiants).");
+    }
+    db.close();
+    db.removeDatabase("testMysql");
+}
+
+void Parametres::on_testConnexionButton_clicked()
+{
+    testConnexion();
+}
