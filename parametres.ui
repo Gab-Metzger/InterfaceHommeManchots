@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Options</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/icone_app/images/icone_app.jpg</normaloff>:/icone_app/images/icone_app.jpg</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -182,6 +186,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

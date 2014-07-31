@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Ouverture Manchot</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/icone_app/images/icone_app.jpg</normaloff>:/icone_app/images/icone_app.jpg</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="1">
     <widget class="QPushButton" name="submitButton">
@@ -64,6 +68,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

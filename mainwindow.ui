@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Interface Homme Manchots</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/icone_app/images/icone_app.jpg</normaloff>:/icone_app/images/icone_app.jpg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="0" rowspan="3" colspan="2">
@@ -269,6 +273,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>
