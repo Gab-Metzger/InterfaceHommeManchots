@@ -23,6 +23,7 @@ void OuvertureManchot::on_submitButton_clicked()
     QString dest = QDir::homePath() + "/.ihmanchots";
     QList<QString> dbCredentials = readDbRegister();
     nbResult = files.Manchot_txt(dbCredentials,directory,dest,idManchot);
+
     filenameRead = dest+"/Temp/Manchot"+QString::number(idManchot)+".txt";
 
     if(nbResult == 1) {

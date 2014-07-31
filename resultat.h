@@ -65,7 +65,6 @@ private:
     lecture_fichiers lect;
     analyse anal;
     double* masse[3];
-    QVector< QList<double> > caractInfo;
     QStringList dateInfo;
 
     QwtPlot *histoPlot;
@@ -78,7 +77,7 @@ private:
     QString fileName;
     double *tmpX,*tmpY;
 
-    int nbPassage;
+    int nbPassage,numValidated;
 
     int compar(QString arg1,QString arg2,int nb);
     void tri_Bulle(QStringList *arg, double **masse);

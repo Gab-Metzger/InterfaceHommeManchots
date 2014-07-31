@@ -81,6 +81,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
     caseTab[1] = ui->complexCase->isChecked();
 
     errorOpenFile = FICHIERS.lire_fichier(filename,&l_data,&nb_valeur,&nb_passage,&cas,num_passage,&dateTime,caseTab);
+
     if (errorOpenFile != 1 ) {
         if (maxInt == -1) {
             plot->setAxisScale(QwtPlot::xBottom,minInt,nb_valeur);
@@ -308,7 +309,6 @@ void MainWindow::on_actionAlgorithme_de_plats_triggered()
     Stat *statArray =  new Stat();
     QVector<double> weightWithConfidence(2);
     QString output = "";
-
 
     weightWithConfidence = ANALYSE.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
 
