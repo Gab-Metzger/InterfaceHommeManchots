@@ -7,6 +7,9 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    tmpX=NULL;
+    tmpY=NULL;
+
     histoPlot  = new QwtPlot(this);
     histoPlot->setTitle("Histogramme Erreurs");
 
@@ -26,8 +29,6 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     curvePlot->setVisible(true);
 
     caractManchot(fileName);
-    tmpX=NULL;
-    tmpY=NULL;
 }
 
 Resultat::~Resultat()
@@ -171,7 +172,6 @@ void Resultat::caractManchot(QString fichierManchot) {
             masse[2]= (double*)realloc(masse[2],tailleMax * sizeof(double));
         }
     }
-
     numValidated = statistique.nbVal;
     initComboBox(TabDate);
     statistique.dataX=masse[0];
@@ -213,11 +213,10 @@ void Resultat::initComboBox(QStringList TabDate) {
     QStringList comboList;
 
     tri_Bulle(&TabDate,masse);
-
     comboList << TabDate[0].mid(0,10);
 
     int l=1;
-    for(int i =0;i<TabDate.length();i++) {
+    for(int i =0;i<numValidated;i++) {
         if ( compar(TabDate[i],comboList[l-1],0) != 0 ) {
             comboList << TabDate[i].mid(0,10);
             l++;
@@ -308,7 +307,7 @@ void Resultat::traceHistoMasse(double poidsTheo,QStringList periode1) {
 
     statInfo statistique = initStatistique(numValidated);
     histoMasseInfo info = initInfo(statistique);
-
+    qDebug() << "ici";
     if ( tmpX != NULL ) {
         free(tmpX);
         tmpX = statistique.dataX;
@@ -317,7 +316,7 @@ void Resultat::traceHistoMasse(double poidsTheo,QStringList periode1) {
         free(tmpY);
         tmpY = statistique.dataY;
     }
-
+    qDebug() << "là";
     QVector<QStringList> periode(2);
     periode[0] = periode1;
     periode[1] = dateInfo;
