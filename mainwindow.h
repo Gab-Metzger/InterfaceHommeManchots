@@ -91,6 +91,10 @@ private:
      * @param statArray
      */
     void traceFlat(Flat *indexArray);
+    /**
+     * @brief removeTempDir
+     */
+    void removeTempDir();
 
 private slots:
     void on_actionOuvrir_triggered();
