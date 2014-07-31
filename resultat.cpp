@@ -54,6 +54,18 @@ statInfo Resultat::initStatistique(int n) {
     return statistique;
 }
 
+int convertion(QString arg,int i) {
+    char xc = arg[i].toLatin1();
+    int x=atoi(&xc);
+    if ( arg[i-1] == '-' ) {
+        x = 10 * x;
+        if ( arg[i+1] == '-' ) {
+            x = x /10;
+        }
+    }
+    return x;
+}
+
 int Resultat::compar(QString arg1,QString arg2,int nb) {
     int res=1,i=0;
 
@@ -64,31 +76,42 @@ int Resultat::compar(QString arg1,QString arg2,int nb) {
     if ( i == (10 + 13*nb)  ) {
         res = 0;
     }
-    else if ( arg1[i] < arg2[i] ){
-        res = -1;
+    else {
+        int x1 = 0,x2=0;
+        x1 = convertion(arg1,i);
+        x2 = convertion(arg2,i);
+
+        if ( x1 < x2 ){
+            res = -1;
+        }
     }
 
     return res;
 }
 
 void Resultat::tri_Bulle(QStringList *arg,double **masse) {
-    int i=0,l=0,n=arg->length();
-    while( i < n ) {
-        while ( (l < (n-i-1) ) && ( compar((*arg)[i+l],(*arg)[i+l+1],1) > 0 ) ) {
-            QString tmp = (*arg)[i+l];
-            double tmpD = masse[1][i+l+1];
+    int n=arg->length();
+    bool echange;
 
-            (*arg)[i+l] = (*arg)[i+l+1];
-            (*arg)[i+l+1] = tmp;
+    do {
+        echange = false;
+        for(int i = 0;i <(n-1);i++) {
+            if ( compar((*arg)[i],(*arg)[i+1],1) > 0 ) {
+                QString tmp = (*arg)[i];
+                double tmpD = masse[1][i+1];
 
-            masse[1][i+l+1] = masse[1][i+l];
-            masse[1][i+l] = tmpD;
+                (*arg)[i] = (*arg)[i+1];
+                (*arg)[i+1] = tmp;
 
-            l++;
+                masse[1][i+1] = masse[1][i];
+                masse[1][i] = tmpD;
+
+                echange = true;
+            }
         }
-        i++;
-        l=0;
-    }
+        n--;
+
+    } while( echange );
 }
 
 void Resultat::caractManchot(QString fichierManchot) {
@@ -203,6 +226,7 @@ void Resultat::initComboBox(QStringList TabDate) {
     tri_Bulle(&TabDate,masse);
 
     comboList << TabDate[0].mid(0,10);
+
     int l=1;
     for(int i =0;i<TabDate.length();i++) {
         if ( compar(TabDate[i],comboList[l-1],0) != 0 ) {

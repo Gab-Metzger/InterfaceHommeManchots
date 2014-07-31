@@ -67,7 +67,8 @@ int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur
 {
     FILE *f;
     int k = 0, sortie = 0,incr=0,num_R_passage=num_passage;
-    char* lecture = (char*)malloc(3 * (sizeof(double)+sizeof(char)));
+    char lecture[30];
+
     QString chemin_ref="";
     int res = 0;
 
@@ -89,7 +90,7 @@ int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur
     k = 0;
     incr = 0;
 
-    while ( fgets(lecture, 100, f) && !sortie && (num_R_passage != -1) ) {
+    while ( fgets(lecture, 30, f) && !sortie && (num_R_passage != -1) ) {
 
         if ( strcmp(lecture, "fin\n") == 0 ) {
             incr++;
@@ -104,9 +105,10 @@ int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur
             sortie = 1;
         }
     }
+
     *nb_valeur = k;
     chemin_ref.clear();
-    free(lecture);
+
     if ( num_passage > num_R_passage ) {
         res = 2;
     }
