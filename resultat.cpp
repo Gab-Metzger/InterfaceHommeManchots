@@ -96,14 +96,15 @@ void Resultat::tri_Bulle(QStringList *arg,double **masse) {
         for(int i = 0;i <(n-1);i++) {
             if ( compar((*arg)[i],(*arg)[i+1],1) > 0 ) {
                 QString tmp = (*arg)[i];
-                double tmpD = masse[1][i+1];
 
                 (*arg)[i] = (*arg)[i+1];
                 (*arg)[i+1] = tmp;
+                for(int j=1;j<3;j++) {
+                    double tmpD = masse[j][i+1];
 
-                masse[1][i+1] = masse[1][i];
-                masse[1][i] = tmpD;
-
+                    masse[j][i+1] = masse[j][i];
+                    masse[j][i] = tmpD;
+                }
                 echange = true;
             }
         }
@@ -140,6 +141,7 @@ void Resultat::caractManchot(QString fichierManchot) {
             masse[0][statistique.nbVal] = statistique.nbVal;
             masse[1][statistique.nbVal] = caractCourbe[0];
             masse[2][statistique.nbVal] = caractCourbe[1];
+            qDebug() << caractCourbe[0];
 
             TabDate << dateTime.mid(0,dateTime.length()-4);
 
@@ -158,6 +160,7 @@ void Resultat::caractManchot(QString fichierManchot) {
                  masse[0][statistique.nbVal] = statistique.nbVal;
                  masse[1][statistique.nbVal] = caractSelected[0];
                  masse[2][statistique.nbVal] = caractSelected[1];
+                 qDebug() << caractSelected[0];
 
                  TabDate << dateTime.mid(0,dateTime.length()-4);
 
@@ -252,12 +255,14 @@ void Resultat::traceCourbe(statInfo statistique){
 
 void Resultat::initHistoMasse(double poidsTheo, histoMasseInfo *info,QVector< QStringList > periode) {
     int nbImpossible=0;
+    qDebug() << "ok";
     for(int i=0;i< numValidated;i++) {
         if ( ( compar(periode[0][0],periode[1][i],0) <= 0 ) && ( compar(periode[0][1],periode[1][i],0) >= 0 )  ) {
 
             info->statistique.dataX[info->statistique.nbVal] = info->statistique.nbVal;
             info->statistique.dataY[info->statistique.nbVal] = masse[1][i];
             miseAJourCaract(&info->statistique,i);
+            qDebug() << masse[1][i] << i;
             if ( poidsTheo != -1 ) {
                 info->error = (masse[1][i] - poidsTheo) / poidsTheo;
                 if ( info->error < 1 ) {
@@ -307,7 +312,7 @@ void Resultat::traceHistoMasse(double poidsTheo,QStringList periode1) {
 
     statInfo statistique = initStatistique(numValidated);
     histoMasseInfo info = initInfo(statistique);
-    qDebug() << "ici";
+
     if ( tmpX != NULL ) {
         free(tmpX);
         tmpX = statistique.dataX;
@@ -316,13 +321,12 @@ void Resultat::traceHistoMasse(double poidsTheo,QStringList periode1) {
         free(tmpY);
         tmpY = statistique.dataY;
     }
-    qDebug() << "là";
+
     QVector<QStringList> periode(2);
     periode[0] = periode1;
     periode[1] = dateInfo;
 
     initHistoMasse(poidsTheo,&info,periode);
-
     info.errorTot = 100*info.errorTot/info.k;
 
     ui->totalErrorLabel->setText("Erreur totale: "+QString::number(info.errorTot)+" %");
