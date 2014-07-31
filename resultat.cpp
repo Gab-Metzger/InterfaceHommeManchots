@@ -141,7 +141,6 @@ void Resultat::caractManchot(QString fichierManchot) {
             masse[0][statistique.nbVal] = statistique.nbVal;
             masse[1][statistique.nbVal] = caractCourbe[0];
             masse[2][statistique.nbVal] = caractCourbe[1];
-            qDebug() << caractCourbe[0];
 
             TabDate << dateTime.mid(0,dateTime.length()-4);
 
@@ -160,7 +159,6 @@ void Resultat::caractManchot(QString fichierManchot) {
                  masse[0][statistique.nbVal] = statistique.nbVal;
                  masse[1][statistique.nbVal] = caractSelected[0];
                  masse[2][statistique.nbVal] = caractSelected[1];
-                 qDebug() << caractSelected[0];
 
                  TabDate << dateTime.mid(0,dateTime.length()-4);
 
@@ -255,14 +253,14 @@ void Resultat::traceCourbe(statInfo statistique){
 
 void Resultat::initHistoMasse(double poidsTheo, histoMasseInfo *info,QVector< QStringList > periode) {
     int nbImpossible=0;
-    qDebug() << "ok";
+
     for(int i=0;i< numValidated;i++) {
         if ( ( compar(periode[0][0],periode[1][i],0) <= 0 ) && ( compar(periode[0][1],periode[1][i],0) >= 0 )  ) {
 
             info->statistique.dataX[info->statistique.nbVal] = info->statistique.nbVal;
             info->statistique.dataY[info->statistique.nbVal] = masse[1][i];
             miseAJourCaract(&info->statistique,i);
-            qDebug() << masse[1][i] << i;
+
             if ( poidsTheo != -1 ) {
                 info->error = (masse[1][i] - poidsTheo) / poidsTheo;
                 if ( info->error < 1 ) {
