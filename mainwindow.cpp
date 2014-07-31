@@ -5,10 +5,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    QDir dir(QString(QDir::homePath()+"/.ihmanchots/Temp"));
-    if ( dir.exists() ) {
-        dir.removeRecursively();
-    }
+    removeTempDir();
 
     ui->setupUi(this);
     readSettings();
@@ -38,8 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 MainWindow::~MainWindow()
 {
-    QDir dir(QString(QDir::homePath()+"/.ihmanchots/Temp"));
-    dir.removeRecursively();
+    removeTempDir();
 
     writeSettings();
     delete omWindow;
@@ -49,6 +45,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOuvrir_triggered()
 {
+    removeTempDir();
     ui->actionR_sultat->setDisabled(true);
     ui->passageSpinBox->setValue(0);
     openTDMSDialog ot;
@@ -434,6 +431,7 @@ void MainWindow::traceFlat(Flat *indexArray) {
 
 void MainWindow::on_actionOuvrir_manchot_triggered()
 {
+   removeTempDir();
    ui->actionR_sultat->setEnabled(true);
    omWindow->exec();
    filename = omWindow->getFileName();
@@ -468,4 +466,11 @@ void MainWindow::on_actionOptions_triggered()
 {
     paramWindow = new Parametres();
     paramWindow->exec();
+}
+
+void MainWindow::removeTempDir() {
+    QDir dir(QString(QDir::homePath()+"/.ihmanchots/Temp"));
+    if ( dir.exists() ) {
+        dir.removeRecursively();
+    }
 }
