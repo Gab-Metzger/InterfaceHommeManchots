@@ -70,7 +70,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
 
     char titre[100];
     double* xs;
-    double **dataInterval;
+    double *dataInterval[4];
     QString dateTime="";
     int h,m,s,ms,max;
     analyse ANALYSE;
@@ -140,8 +140,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
             max = maxInt;
         }
 
-        xs =(double*)malloc((max-minInt)*sizeof(double));
-        dataInterval = (double**)calloc(4,sizeof(double*));
+        xs =(double*)calloc((max-minInt),sizeof(double));
 
         for (int i=0;i<4;i++) {
             dataInterval[i] = (double*)calloc((max-minInt),sizeof(double));
@@ -161,14 +160,6 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
             }
         }
 
-        if (shouldSmooth > 0) {
-            for (int i=0;i<4;i++) {
-                for(int j=minInt;j<max;j++) {
-                    l_data[i][j] = dataInterval[i][j-minInt];
-                }
-            }
-        }
-
         for (int x = minInt; x < max; x++) {
             xs[x-minInt]=x;
         }
@@ -179,7 +170,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
         color[3] = new QPen(Qt::black);
         QwtPlotZoomer* zoomer = new QwtPlotZoomer(plot->canvas());
 
-        weightWithConfidence = ANALYSE.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
+        weightWithConfidence = ANALYSE.getWeightByFlat(dataInterval,(max-minInt),indexArray,statArray);
 
         if (  anal.isGoodFlat(weightWithConfidence, dataInterval,(max-minInt)) ) {
             output = "Algorithme plat:\nMasse : " + QString::number(weightWithConfidence[0]) + " kg\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
