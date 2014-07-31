@@ -98,7 +98,7 @@ void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmoot
             ui->intervalMaxSpinBox->setMaximum(maxInt);
             ui->intervalMaxSpinBox->setValue(maxInt);
         }
-
+        ui->intervalMinSpinBox->setValue(minInt);
         ui->passageSpinBox->setRange(0,nb_passage-1);
 
 
@@ -386,7 +386,7 @@ void MainWindow::on_actionEnregistrer_triggered()
 
 void MainWindow::on_actionLisser_la_courbe_triggered()
 {
-    tracer(ui->passageSpinBox->value(),0,-1,1);
+    tracer(ui->passageSpinBox->value(),ui->intervalMinSpinBox->value(),ui->intervalMaxSpinBox->value(),1);
 }
 
 void MainWindow::traceFlat(Flat *indexArray) {

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Ouverture fichier TDMS</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/icone_app/images/icone_app.jpg</normaloff>:/icone_app/images/icone_app.jpg</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="5">
     <widget class="QCalendarWidget" name="calendarWidget">
@@ -92,6 +96,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

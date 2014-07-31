@@ -48,3 +48,6 @@ INCLUDEPATH += C:\qwt-6.1.0\src\
 LIBS += -LC:\qwt-6.1.0\lib\qwt.dll
 LIBS += -LC:\qwt-6.1.0\lib\qwtd.dll
 LIBS += -L"$$_PRO_FILE_PWD_\libs" -lOpenTdms
+
+RESOURCES += \
+    images.qrc
