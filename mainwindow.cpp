@@ -366,6 +366,7 @@ void MainWindow::on_actionEnregistrer_triggered()
     QString jpegExt=".jpeg", pngExt=".png";
     //QString suggestedName=restorePath().replace("flxhst","jpeg");
     QString fn = QFileDialog::getSaveFileName(this,tr("Save Image"),QDir::homePath(),types,&filter);
+
     if (!fn.isEmpty()) {
         if (fn.contains(jpegExt)) {
             fn.remove(jpegExt);

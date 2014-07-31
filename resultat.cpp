@@ -252,6 +252,7 @@ void Resultat::traceCourbe(statInfo statistique){
 }
 
 void Resultat::initHistoMasse(double poidsTheo, histoMasseInfo *info,QVector< QStringList > periode) {
+    int nbImpossible=0;
     for(int i=0;i< numValidated;i++) {
         if ( ( compar(periode[0][0],periode[1][i],0) <= 0 ) && ( compar(periode[0][1],periode[1][i],0) >= 0 )  ) {
 
@@ -260,15 +261,33 @@ void Resultat::initHistoMasse(double poidsTheo, histoMasseInfo *info,QVector< QS
             miseAJourCaract(&info->statistique,i);
             if ( poidsTheo != -1 ) {
                 info->error = (masse[1][i] - poidsTheo) / poidsTheo;
+                if ( info->error < 1 ) {
 
-                info->Error[floor(1000*( info->error + 1) )] += masse[2][i];
-                info->errorTot += masse[2][i] * info->error;
+                    info->Error[floor(1000*( info->error + 1) )] += masse[2][i];
+                    info->errorTot += masse[2][i] * info->error;
 
-                if ( info->error > info->max ) {info->max = info->error;}
-                if ( info->error < info->min ) {info->min = info->error;}
+                    if ( info->error > info->max ) {info->max = info->error;}
+                    if ( info->error < info->min ) {info->min = info->error;}
+                }
+                else {
+                    nbImpossible++;
+                }
             }
             info->k += masse[2][i];
         }
+    }
+    if ( nbImpossible > 0 ) {
+        if ( nbImpossible == numValidated ){
+            ui->label->setText(QString("Attention Histogramme vide\n%1 éléments plus de 100% d'erreur").arg(nbImpossible));
+            ui->label->setVisible(true);
+        }
+        else {
+            ui->label->setText(QString("Attention Histogramme incomplet\n%1 éléments plus de 100% d'erreur").arg(nbImpossible));
+            ui->label->setVisible(true);
+        }
+    }
+    else {
+        ui->label->setVisible(false);
     }
 }
 
@@ -381,7 +400,7 @@ void Resultat::on_comboBox_currentIndexChanged(int index)
 void Resultat::miseAJourPeriode() {
     QStringList periode;
     periode << ui->comboBox->currentText() << ui->comboBox_2->currentText();
-    if ( !ui->theoLineEdit->text().isEmpty() ) {
+    if ( !ui->theoLineEdit->text().isEmpty() ) {            
         traceHistoMasse(ui->theoLineEdit->text().toDouble(),periode);
     }
     else {
