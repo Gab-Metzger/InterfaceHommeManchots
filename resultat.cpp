@@ -25,8 +25,6 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     histoPlot->setVisible(false);
     curvePlot->setVisible(true);
 
-    caractInfo.resize(2);
-
     caractManchot(fileName);
     tmpX=NULL;
     tmpY=NULL;
@@ -39,7 +37,6 @@ Resultat::~Resultat()
     free(masse[2]);
     free(tmpX);
     free(tmpY);
-    caractInfo.clear();
     delete ui;
 }
 
@@ -139,11 +136,6 @@ void Resultat::caractManchot(QString fichierManchot) {
 
         if (  anal.isGoodFlat(caractCourbe, dataCourbe,nbVal) ) {
 
-            caractInfo[0] << caractCourbe[0];
-            caractInfo[1] << caractCourbe[1];
-
-            dateInfo << dateTime.mid(0,10);
-
             masse[0][statistique.nbVal] = statistique.nbVal;
             masse[1][statistique.nbVal] = caractCourbe[0];
             masse[2][statistique.nbVal] = caractCourbe[1];
@@ -161,11 +153,6 @@ void Resultat::caractManchot(QString fichierManchot) {
              caractSelected = diag->caractLoiNormal(maxData,dataCourbe,nbVal);
 
              if ( caractSelected[0] > 0 ) {
-
-                 caractInfo[0] << caractSelected[0];
-                 caractInfo[1] << caractSelected[1];
-
-                 dateInfo << dateTime.mid(0,10);
 
                  masse[0][statistique.nbVal] = statistique.nbVal;
                  masse[1][statistique.nbVal] = caractSelected[0];
@@ -185,10 +172,12 @@ void Resultat::caractManchot(QString fichierManchot) {
         }
     }
 
+    numValidated = statistique.nbVal;
     initComboBox(TabDate);
     statistique.dataX=masse[0];
     statistique.dataY=masse[1];
     nbPassage = i;
+
     traceCourbe(statistique);
 }
 
@@ -233,6 +222,7 @@ void Resultat::initComboBox(QStringList TabDate) {
             comboList << TabDate[i].mid(0,10);
             l++;
         }
+        dateInfo << TabDate[i].mid(0,10);
     }
 
     ui->comboBox->addItems(comboList);
@@ -262,23 +252,22 @@ void Resultat::traceCourbe(statInfo statistique){
 }
 
 void Resultat::initHistoMasse(double poidsTheo, histoMasseInfo *info,QVector< QStringList > periode) {
-
-    for(int i=0;i< caractInfo[0].length();i++) {
+    for(int i=0;i< numValidated;i++) {
         if ( ( compar(periode[0][0],periode[1][i],0) <= 0 ) && ( compar(periode[0][1],periode[1][i],0) >= 0 )  ) {
 
             info->statistique.dataX[info->statistique.nbVal] = info->statistique.nbVal;
             info->statistique.dataY[info->statistique.nbVal] = masse[1][i];
             miseAJourCaract(&info->statistique,i);
             if ( poidsTheo != -1 ) {
-                info->error = (caractInfo[0][i] - poidsTheo) / poidsTheo;
+                info->error = (masse[1][i] - poidsTheo) / poidsTheo;
 
-                info->Error[floor(1000*( info->error + 1) )] += caractInfo[1][i];
-                info->errorTot += caractInfo[1][i] * info->error;
+                info->Error[floor(1000*( info->error + 1) )] += masse[2][i];
+                info->errorTot += masse[2][i] * info->error;
 
                 if ( info->error > info->max ) {info->max = info->error;}
                 if ( info->error < info->min ) {info->min = info->error;}
             }
-            info->k += caractInfo[1][i];
+            info->k += masse[2][i];
         }
     }
 }
@@ -298,8 +287,7 @@ histoMasseInfo Resultat::initInfo(statInfo statistique){
 
 void Resultat::traceHistoMasse(double poidsTheo,QStringList periode1) {
 
-    int n= caractInfo[0].length();
-    statInfo statistique = initStatistique(n);
+    statInfo statistique = initStatistique(numValidated);
     histoMasseInfo info = initInfo(statistique);
 
     if ( tmpX != NULL ) {
