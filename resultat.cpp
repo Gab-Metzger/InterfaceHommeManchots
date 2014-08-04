@@ -5,6 +5,7 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Resultat)
 {
+    init = false;
     ui->setupUi(this);
 
     tmpX=NULL;
@@ -27,8 +28,10 @@ Resultat::Resultat(QString fichierManchot, QWidget *parent) :
 
     histoPlot->setVisible(false);
     curvePlot->setVisible(true);
+    ui->label->setVisible(false);
 
     caractManchot(fileName);
+    init = true;
 }
 
 Resultat::~Resultat()
@@ -67,20 +70,25 @@ int convertion(QString arg,int i) {
 int Resultat::compar(QString arg1,QString arg2,int nb) {
     int res=1,i=0;
 
-    while ( ( i < (10 + 13*nb) ) && ( arg1[i] == arg2[i]) ){
-        i++;
+    if ( arg1.length() == 0 ) {
+        res = -1;
     }
+    else if ( arg2.length() > 0 ){
+        while ( ( i < (10 + 13*nb) ) && ( arg1[i] == arg2[i]) ){
+            i++;
+        }
 
-    if ( i == (10 + 13*nb)  ) {
-        res = 0;
-    }
-    else {
-        int x1 = 0,x2=0;
-        x1 = convertion(arg1,i);
-        x2 = convertion(arg2,i);
+        if ( i == (10 + 13*nb)  ) {
+            res = 0;
+        }
+        else {
+            int x1 = 0,x2=0;
+            x1 = convertion(arg1,i);
+            x2 = convertion(arg2,i);
 
-        if ( x1 < x2 ){
-            res = -1;
+            if ( x1 < x2 ){
+                res = -1;
+            }
         }
     }
 
@@ -384,18 +392,22 @@ void Resultat::on_histoGraphButton_clicked()
 
 void Resultat::on_comboBox_2_currentIndexChanged(int index)
 {
-    if ( index < ui->comboBox->currentIndex() ) {
-        ui->comboBox_2->setCurrentIndex(ui->comboBox->currentIndex());
+    if ( init ) {
+        if ( index < ui->comboBox->currentIndex()  && init ) {
+            ui->comboBox_2->setCurrentIndex(ui->comboBox->currentIndex());
+        }
+        miseAJourPeriode();
     }
-    miseAJourPeriode();
 }
 
 void Resultat::on_comboBox_currentIndexChanged(int index)
 {
-    if ( index > ui->comboBox_2->currentIndex()) {
-        ui->comboBox_2->setCurrentIndex(index);
+    if ( init ) {
+        if ( index > ui->comboBox_2->currentIndex() ) {
+            ui->comboBox_2->setCurrentIndex(index);
+        }
+        miseAJourPeriode();
     }
-    miseAJourPeriode();
 }
 
 void Resultat::miseAJourPeriode() {

@@ -76,6 +76,7 @@ private:
     QwtPlotHistogram *histo;
     QString fileName;
     double *tmpX,*tmpY;
+    bool init;
 
     int nbPassage,numValidated;
 
