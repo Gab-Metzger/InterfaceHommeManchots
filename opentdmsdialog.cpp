@@ -68,7 +68,8 @@ void openTDMSDialog::on_submitButton_clicked()
     QFuture<int> future = QtConcurrent::run(&this->files,&OpenTdms::creation_txt,directory,dest,infoFile,-1);
     this->futureWatcher.setFuture(future);
     error = future.result();
-    if (error == 2) {
+    qDebug() << error;
+    if (error == -3) {
         QMessageBox::critical(this,"Erreur","Le dossier spécifié ne contient pas de fichier TDMS");
     }else {
         if (erreur.exists(tdmsname)) {
@@ -79,7 +80,7 @@ void openTDMSDialog::on_submitButton_clicked()
             authorization = true;
             close();
         }else {
-            QMessageBox::critical(this,"Erreur","Erreur TDMS");
+            QMessageBox::critical(this,"Erreur","N/A : Il n'y a pas de données à cette heure-ci.");
         }
 
     }

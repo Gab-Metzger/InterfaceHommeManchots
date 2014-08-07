@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balance2->setStyleSheet("QCheckBox {color: green;}");
     ui->balance3->setStyleSheet("QCheckBox {color: red;}");
     ui->actionR_sultat->setDisabled(true);
+    ui->simpleCase->setDisabled(true);
+    ui->complexCase->setDisabled(true);
 
     existFlat = false;
     omWindow = new OuvertureManchot(this);
@@ -54,6 +56,8 @@ void MainWindow::on_actionOuvrir_triggered()
     filename = ot.getFileName();
     if (ot.getAuthorizationDraw()) {
         tracer(0,0,-1);
+        ui->simpleCase->setEnabled(true);
+        ui->complexCase->setEnabled(true);
     }
     this->setWindowTitle(filename);
 }
@@ -440,6 +444,8 @@ void MainWindow::on_actionOuvrir_manchot_triggered()
        ui->passageSpinBox->setValue(0);
        tracer(0,0,-1);
        this->setWindowTitle(filename);
+       ui->simpleCase->setEnabled(true);
+       ui->complexCase->setEnabled(true);
    }
 }
 
