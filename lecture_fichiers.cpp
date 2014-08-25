@@ -4,7 +4,7 @@ lecture_fichiers::lecture_fichiers()
 {
 }
 
-double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_passage,char *cas,QString *dateTime,bool caseTab[])
+double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_passage,char *cas,int *numTransition, QString *dateTime,bool caseTab[])
 {
     FILE *g;
     char lecture_v[300];
@@ -22,7 +22,7 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
 
     while ( fgets(lecture_v,300,g) && ( validate != (*num_passage + 1) ) ) {
 
-        sscanf(lecture_v,"%s %s %d %d %c\n",date,heure,&plateau,&taille,cas);
+        sscanf(lecture_v,"%s %s %d %d %c %d\n",date,heure,&plateau,&taille,cas,numTransition);
 
         *dateTime=QString("").append(date).append(" ").append(heure).append(" "+QString::number(plateau));
 
@@ -63,7 +63,7 @@ double** lecture_fichiers::allocation_m(QString titre, int* nb_passage,int *num_
     return data;
 }
 
-int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur, int* nb_passage, char* cas, int num_passage,QString *dateTime, bool caseTab[2])
+int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur, int* nb_passage, char* cas, int *numTransition, int num_passage,QString *dateTime, bool caseTab[2])
 {
     FILE *f;
     int k = 0, sortie = 0,incr=0,num_R_passage=num_passage;
@@ -78,7 +78,7 @@ int lecture_fichiers::lire_fichier(QString titre, double*** data, int* nb_valeur
         chemin_ref.replace("plateau","reference");
     }
 
-    (*data)=allocation_m(chemin_ref,nb_passage,&num_R_passage,cas,dateTime,caseTab);
+    (*data)=allocation_m(chemin_ref,nb_passage,&num_R_passage,cas,numTransition,dateTime,caseTab);
 
     errno_t err = fopen_s(&f,titre.toStdString().c_str(), "r+");
 

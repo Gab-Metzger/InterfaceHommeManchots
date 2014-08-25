@@ -12,6 +12,7 @@
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 #include "opentdms.h"
+#include "readregister.h"
 
 namespace Ui {
 class openTDMSDialog;
@@ -53,6 +54,22 @@ private:
      * @param path
      */
     void writeRegister();
+    /**
+     * @brief chooseGoodYear
+     * @return
+     */
+    QString chooseGoodYear();
+    /**
+     * @brief errorManage
+     * @param error
+     * @param erreur
+     * @param tdmsname
+     */
+    void errorManage(int error,QDir erreur, QString tdmsname);
+    /**
+     * @brief createTextFile
+     */
+    void createTextFile();
 };
 
 #endif // OPENTDMSDIALOG_H

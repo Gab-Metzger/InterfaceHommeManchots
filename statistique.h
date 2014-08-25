@@ -7,10 +7,10 @@
 #include <QList>
 #include <QDebug>
 
-class statistique
+class Statistique
 {
 public:
-    statistique();
+    Statistique();
     /**
      * @brief moustach
      * @param data

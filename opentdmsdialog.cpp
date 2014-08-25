@@ -6,7 +6,8 @@ openTDMSDialog::openTDMSDialog(QWidget *parent) :
     ui(new Ui::openTDMSDialog)
 {
     ui->setupUi(this);
-    directory = readRegister();  
+    directory = ReadRegister::readInRegister("OpenTDMSDialog/destinationPath").toString();
+    ui->calendarWidget->setSelectedDate(ReadRegister::readInRegister("OpenTDMSDialog/selectedDate").toDate());
     ui->tdmsFileLabel->setText(QString("Répertoire sélectionné : " + directory));
 
     QDir calendarDayExist(directory);
@@ -40,6 +41,10 @@ QString openTDMSDialog::getFileName() {
 
 void openTDMSDialog::on_submitButton_clicked()
 {    
+    createTextFile();
+}
+
+void openTDMSDialog::createTextFile() {
     QString balanceChoice, date;
     QString hour;
     QString dest = QDir::homePath() + "/.ihmanchots";
@@ -65,13 +70,20 @@ void openTDMSDialog::on_submitButton_clicked()
     erreur.removeRecursively();
     QString tdmsname = hour + "-00-00 plateau" + balanceChoice + ".txt";
     QString infoFile = date + " " + hour + " " + balanceChoice;
+    directory = chooseGoodYear();
     QFuture<int> future = QtConcurrent::run(&this->files,&OpenTdms::creation_txt,directory,dest,infoFile,-1);
     this->futureWatcher.setFuture(future);
     error = future.result();
-    qDebug() << error;
+
+    errorManage(error,erreur,tdmsname);
+    directory = ReadRegister::readInRegister("OpenTDMSDialog/destinationPath").toString();
+}
+
+void openTDMSDialog::errorManage(int error,QDir erreur, QString tdmsname) {
     if (error == -3) {
         QMessageBox::critical(this,"Erreur","Le dossier spécifié ne contient pas de fichier TDMS");
-    }else {
+    }
+    else {
         if (erreur.exists(tdmsname)) {
             this->progressDialog->setMinimum(0);
             this->progressDialog->setMaximum(0);
@@ -84,16 +96,6 @@ void openTDMSDialog::on_submitButton_clicked()
         }
 
     }
-
-}
-
-QString openTDMSDialog::readRegister() {
-    QString destination;
-    QSettings settings("METZGER","IHManchots");
-
-    destination = settings.value("OpenTDMSDialog/destinationPath").toString();
-    ui->calendarWidget->setSelectedDate(settings.value("OpenTDMSDialog/selectedDate").toDate());
-    return destination;
 }
 
 void openTDMSDialog::writeRegister() {
@@ -121,4 +123,24 @@ void openTDMSDialog::on_calendarWidget_selectionChanged()
 
 bool openTDMSDialog::getAuthorizationDraw() {
     return authorization;
+}
+
+QString openTDMSDialog::chooseGoodYear() {
+    QDir dirPath(directory);
+    QFileInfoList years = dirPath.entryInfoList();
+    QDate date = ui->calendarWidget->selectedDate();
+    QString path="";
+
+    for (int i = 0; i < years.size(); i++) {
+        QString year = years[i].fileName();
+        if (year.contains(ui->calendarWidget->selectedDate().toString("yyyy"))) {
+            QDir tmpDir(QString(directory+"/"+year));
+            QFileInfoList tmpList = tmpDir.entryInfoList();
+            if((date >= QDate::fromString(tmpList[2].fileName(),"yyyy-MM-dd")) && (date <= QDate::fromString(tmpList[tmpList.size()-1].fileName(),"yyyy-MM-dd"))) {
+                path = directory + "/" + year;
+            }
+        }
+    }
+
+    return path;
 }

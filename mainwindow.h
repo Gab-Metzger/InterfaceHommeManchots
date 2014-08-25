@@ -21,6 +21,10 @@
 #include "ouverturemanchot.h"
 #include "resultat.h"
 #include "parametres.h"
+#include "algoplatmanager.h"
+#include "database.h"
+#include "updatedatabase.h"
+#include "readregister.h"
 
 namespace Ui {
 class MainWindow;
@@ -37,25 +41,37 @@ public:
 private:
     Ui::MainWindow *ui;
     lecture_fichiers FICHIERS;
+    OpenTdms ot;
+    Analyse anal;
+    histoDialog *histoWindow;
+    Parametres *paramWindow;
+    Resultat *resultWindow;
+    OuvertureManchot *omWindow;
+    AlgoPlatManager *managerPlatWindow;
+    UpdateDatabase *updateDatabaseWindow;
+
     double** l_data;
+    double* xs;
+    double *dataInterval[4];
     int nb_valeur;
     int selection[4];
     int nb_passage;
+    int numTransition;
     int sizeFlat[4];
+    int max;
     char cas;
     QString filename;
     QwtPlot *plot;
     QwtPlotCurve *curve[4];
     QwtPlotCurve **curveFlat[4];
     QPen *color [4];
-    histoDialog *histoWindow;
-    OuvertureManchot *omWindow;
-    Resultat *resultWindow;
-    Parametres *paramWindow;
+
     int errorOpenFile;
     bool existFlat;
-    analyse anal;
+
     double* tmp;
+    QSqlDatabase db;
+    double finalWeight;
 
     /**
      * @brief affiche
@@ -70,6 +86,46 @@ private:
      * @param maxInt
      */
     void tracer(int num_passage, int minInt, int maxInt, int shouldSmooth = 0);
+    /**
+     * @brief MainWindow::initGraphicComposents
+     * @param maxInt
+     */
+    void initGraphicComposents(int minInt, int maxInt);
+    /**
+     * @brief MaxWindow::initPlot
+     * @param dateTime
+     */
+    void initPlot(QString dateTime, int min);
+    /**
+     * @brief calculDatas
+     * @param min
+     * @param maxInt
+     * @param shouldSmooth
+     * @param xs
+     * @param dataInterval
+     * @return
+     */
+    int calculDatas(int min, int maxInt, int shouldSmooth);
+    /**
+     * @brief MainWindow::calculXDatas
+     * @param min
+     * @param max
+     * @param xs
+     */
+    void calculXDatas(int min, int max);
+    /**
+     * @brief MainWindow::calculYDatas
+     * @param minInt
+     * @param max
+     * @return
+     */
+    void calculYDatas(int minInt, int max, int shouldSmooth);
+    /**
+     * @brief MainWindow::displayResults
+     * @param caractCourbe
+     * @return
+     */
+    QString displayResults(QVector<double> caractCourbe);
     /**
      * @brief writeSettings
      */
@@ -90,7 +146,7 @@ private:
      * @param indexArray
      * @param statArray
      */
-    void traceFlat(Flat *indexArray);
+    void traceFlat(CaractFlat *indexArray);
     /**
      * @brief removeTempDir
      */
@@ -116,6 +172,8 @@ private slots:
     void on_complexCase_clicked();
     void on_actionR_sultat_triggered();
     void on_actionOptions_triggered();
+    void on_actionMettre_jour_dans_la_BDD_triggered();
+    void on_actionSauvegarder_Poids_triggered();
 };
 
 #endif // MAINWINDOW_H

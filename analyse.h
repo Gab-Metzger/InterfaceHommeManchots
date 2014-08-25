@@ -1,117 +1,53 @@
 #ifndef ANALYSE_H
 #define ANALYSE_H
 
-#include <QVector>
-#include <QDebug>
-#include <QString>
-#include <QMessageBox>
-#include "math.h"
+#include "analyse_global.h"
+#include "flat.h"
+#include "histogramme.h"
 #include "statistique.h"
-#include <qwt.h>
-#include <qwt_plot.h>
-#include <qwt_plot_grid.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_curve.h>
-#include <qwt_point_data.h>
-#include <qwt_scale_widget.h>
-#include <qwt_plot_layout.h>
 
-#define SEUIL_V 0.3
-#define SEUIL_H 50
+typedef struct statInfo{
+    double moy;
+    double var;
+    double size;
+    double *dataY;
+    double *dataX;
+    int nbVal;
+}statInfo;
 
+typedef struct histoMasseInfo{
+    double errorTot;
+    double min;
+    double max;
+    double error;
+    QVector<double> Error;
+    double k;
+    statInfo statistique;
+}histoMasseInfo;
 
-typedef struct indexTab {
-    QVector<QVector<int> >indexStart;
-    QVector<QVector<int> >indexStop;
-} Flat;
-
-typedef struct caractStat {
-   QVector<double> sum;
-   QVector<double> var;
-   double length[4];
-}Stat;
-
-class analyse
+class ANALYSESHARED_EXPORT Analyse
 {
-public:
-    analyse();
-     bool isGoodFlat(QVector<double> caractCourbe, double **data, int size);
-    /**
-     * @brief detectAllFlat
-     * @param data
-     * @param nb_value
-     * @param array
-     */
-    void detectAllFlat(double **data, int nb_value, Flat *array);
-    /**
-     * @brief meanValuesEachFlat
-     * @param data
-     * @param indexArray
-     * @return
-     */
-    QVector<QVector<double> > meanValuesEachFlat(double **data, Flat *indexArray);
-    /**
-     * @brief lengthOfEachFlat
-     * @param i
-     * @param meanValues
-     * @param indexArray
-     * @param minMean
-     * @param maxMean
-     * @param meanWeight
-     * @return
-     */
-    void lengthOfEachFlat(int i, QVector<double>meanValues, Flat *indexArray, double minMean, double maxMean);
-    /**
-     * @brief lengthGoodFlats
-     * @param meanValues
-     * @param indexArray
-     * @param meanWeight
-     * @return
-     */
-    void lengthGoodFlats(QVector<QVector<double> >meanValues, Flat *indexArray);
-    /**
-     * @brief getTruthfulIndex
-     * @param lengthFlats
-     * @param lengthTotal
-     * @return
-     */
-    QVector<double> getTruthfulIndex(double lengthFlats[], int lengthTotal);
-    /**
-     * @brief meanVarianceValuesByFlat
-     * @param data
-     * @param res
-     * @param indexArray
-     */
-    void meanVarianceValuesByFlat(double **data, Stat *res, Flat *indexArray);
-    /**
-     * @brief getWeightByFlat
-     * @param data
-     * @param nb_valeur
-     * @param indexArray
-     * @param statArray
-     * @return
-     */
-    QVector<double> getWeightByFlat(double **data, int nb_valeur, Flat *indexArray, Stat *statArray);
-private:
-    QwtPlot *plot;
-    QwtPlotCurve *curve[4];
-    QwtPlotCurve *curveWeight[4];
-    statistique stat;
-    /**
-     * @brief detectOneFlat
-     * @param indice
-     * @param data
-     * @param nb_value
-     */
-    void detectOneFlat(int *indice, double *data, int nb_value);
-    /**
-     * @brief lookIntoOneFlat
-     * @param index
-     * @param data
-     * @param nb_value
-     */
-    void lookIntoOneFlat(int *index, int start, double *data, int nb_value);
 
+public:
+    Analyse();
+    int convertion(QString arg,int i);
+    int compar(QString arg1,QString arg2,int nb);
+    void tri_Bulle(QStringList *arg,double **masse);
+    void lissageCourbe(double** dataCourbe, int nbVal);
+    void miseAJourCaract(statInfo *statistique, double **masse, int numValidated);
+    void setMasseDate(double** masse, QVector<double> caractCourbe, statInfo* statistique);
+    QVector<double> analysePassage(double** dataCourbe,int nbVal,CaractFlat* indexArray,Stat* statArray);
+    QVector<double> getWeightByFlat(double **data, int nb_valeur, CaractFlat *indexArray, Stat *statArray);
+    bool isGoodFlat(QVector<double> caractCourbe, double **data, int size);
+    void  initLoiNormal(double** loiNormal, double moy, double maxHisto, double max);
+    void initInter(QVector<double> *element_interval,double* data,double max, int nb_valeur, double *histoMax);
+    void calculMax(double **data, int nb_valeur,double max[4]);
+    QVector<double> caractLoiNormal(double** data,double nbData,int c);
+
+private:
+    Flat fl;
+    Histogramme ht;
+    Statistique st;
 };
 
 #endif // ANALYSE_H

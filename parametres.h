@@ -9,6 +9,7 @@
 #include <QSqlDatabase>
 #include <QMessageBox>
 #include "database.h"
+#include "readregister.h"
 
 namespace Ui {
 class Parametres;

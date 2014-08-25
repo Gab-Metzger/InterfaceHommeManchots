@@ -8,14 +8,21 @@ Parametres::Parametres(QWidget *parent) :
     ui->setupUi(this);
 
     //Init TDMS files directory
-    if (readDirectoryRegister().isEmpty()) {
+    if (ReadRegister::readInRegister("OpenTDMSDialog/destinationPath").toString().isEmpty()) {
         directory = "";
     }
     else {
-        directory = readDirectoryRegister();
+        directory = ReadRegister::readInRegister("OpenTDMSDialog/destinationPath").toString();
     }
     ui->tdmsFileLineEdit->setText(directory);
-    QList<QString> dbCredentials = readDbRegister();
+
+    QVariantList reading;
+    QList<QString> dbCredentials;
+    reading = ReadRegister::readInRegister("Database/dbCredentials").toList();
+    foreach(QVariant v, reading) {
+        dbCredentials << v.toString();
+    }
+
     if(!dbCredentials.isEmpty()) {
         ui->domainNameLineEdit->setText(dbCredentials.at(0));
         ui->databaseNameLineEdit->setText(dbCredentials.at(1));
@@ -27,27 +34,6 @@ Parametres::Parametres(QWidget *parent) :
 Parametres::~Parametres()
 {
     delete ui;
-}
-
-QString Parametres::readDirectoryRegister() {
-    QString destination;
-    QSettings settings("METZGER","IHManchots");
-
-    destination = settings.value("OpenTDMSDialog/destinationPath").toString();
-    return destination;
-}
-
-QList<QString> Parametres::readDbRegister() {
-    QVariantList reading;
-    QList<QString> db;
-    QSettings settings("METZGER","IHManchots");
-
-    reading = settings.value("Database/dbCredentials").toList();
-    foreach(QVariant v, reading) {
-        db << v.toString();
-    }
-
-    return db;
 }
 
 void Parametres::writeRegister(QString path, QVariantList list) {

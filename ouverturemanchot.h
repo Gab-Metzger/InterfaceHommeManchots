@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include "opentdms.h"
 #include "database.h"
+#include "readregister.h"
 
 namespace Ui {
 class OuvertureManchot;
@@ -32,7 +33,6 @@ private:
     QString filenameRead;
     QString directory;
     bool authorization;
-    QString readDirectoryRegister();
     QList<QString> readDbRegister();
 };
 

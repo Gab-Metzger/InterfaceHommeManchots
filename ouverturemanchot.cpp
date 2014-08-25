@@ -7,7 +7,7 @@ OuvertureManchot::OuvertureManchot(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->idLineEdit->setFocus();
-    directory = readDirectoryRegister();
+    directory = ReadRegister::readInRegister("OpenTDMSDialog/destinationPath").toString();
     authorization = false;
 }
 
@@ -21,8 +21,7 @@ void OuvertureManchot::on_submitButton_clicked()
     int idManchot = ui->idLineEdit->text().toInt();
     int nbResult;
     QString dest = QDir::homePath() + "/.ihmanchots";
-    QList<QString> dbCredentials = readDbRegister();
-    nbResult = files.Manchot_txt(dbCredentials,directory,dest,idManchot);
+    nbResult = files.ManchotTxt(directory,dest,idManchot);
 
     filenameRead = dest+"/Temp/Manchot"+QString::number(idManchot)+".txt";
 
@@ -49,25 +48,4 @@ bool OuvertureManchot::getAuthorizationDraw() {
 void OuvertureManchot::on_cancelButton_clicked()
 {
     close();
-}
-
-QString OuvertureManchot::readDirectoryRegister() {
-    QString destination;
-    QSettings settings("METZGER","IHManchots");
-
-    destination = settings.value("OpenTDMSDialog/destinationPath").toString();
-    return destination;
-}
-
-QList<QString> OuvertureManchot::readDbRegister() {
-    QVariantList reading;
-    QList<QString> db;
-    QSettings settings("METZGER","IHManchots");
-
-    reading = settings.value("Database/dbCredentials").toList();
-    foreach(QVariant v, reading) {
-        db << v.toString();
-    }
-
-    return db;
 }

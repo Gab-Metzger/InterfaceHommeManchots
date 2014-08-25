@@ -4,6 +4,7 @@
 #include <QDialog>
 #include "lecture_fichiers.h"
 #include "analyse.h"
+#include "database.h"
 #include <qwt.h>
 #include <qwt_plot.h>
 #include <qwt_plot_grid.h>
@@ -16,26 +17,6 @@
 #include <histodialog.h>
 #include <QTimer>
 
-typedef struct statInfo{
-    double moy;
-    double var;
-    double size;
-    double *dataY;
-    double *dataX;
-    int nbVal;
-}statInfo;
-
-typedef struct histoMasseInfo{
-    double errorTot;
-    double min;
-    double max;
-    double error;
-    QVector<double> Error;
-    double k;
-    statInfo statistique;
-}histoMasseInfo;
-
-
 namespace Ui {
 class Resultat;
 }
@@ -47,7 +28,7 @@ class Resultat : public QDialog
 public:
     explicit Resultat(QString fichierManchot, QWidget *parent = 0);
     ~Resultat();
-    void caractManchot(QString fichierManchot);
+    void caractManchot(QString fichierManchot, bool shouldUpdateDatabase=false);
 
 private slots:
     void on_theoValidateButton_clicked();
@@ -63,8 +44,8 @@ private slots:
 private:
     Ui::Resultat *ui;
     lecture_fichiers lect;
-    analyse anal;
-    double* masse[3];
+    Analyse anal;
+
     QStringList dateInfo;
 
     QwtPlot *histoPlot;
@@ -75,23 +56,20 @@ private:
 
     QwtPlotHistogram *histo;
     QString fileName;
-    double *tmpX,*tmpY;
-    bool init;
 
+    double *tmpX,*tmpY,*masse[3];
+    bool init;
     int nbPassage,numValidated;
 
-    int compar(QString arg1,QString arg2,int nb);
-    void tri_Bulle(QStringList *arg, double **masse);
+    statInfo initStatistique(int n);
+    histoMasseInfo initInfo(statInfo statistique);
 
     void traceHistoMasse(double poidsTheo, QStringList periode1);
     void traceCourbe(statInfo statistique);
 
     void initComboBox(QStringList TabDate);
-    void lissageCourbe(double **dataCourbe, int nbVal);
-    void miseAJourCaract(statInfo *statistique, int numValidated);
     void initHistoMasse(double poidsTheo, histoMasseInfo *info, QVector<QStringList> periode);
-    statInfo initStatistique(int n);
-    histoMasseInfo initInfo(statInfo statistique);
+
     void miseAJourPeriode();
 };
 

@@ -193,6 +193,7 @@
     <addaction name="actionLisser_la_courbe"/>
     <addaction name="separator"/>
     <addaction name="actionR_sultat"/>
+    <addaction name="actionMettre_jour_dans_la_BDD"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -200,6 +201,7 @@
     </property>
     <addaction name="separator"/>
     <addaction name="actionOptions"/>
+    <addaction name="actionSauvegarder_Poids"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuHistogrammes"/>
@@ -269,6 +271,16 @@
   <action name="actionOptions">
    <property name="text">
     <string>Options...</string>
+   </property>
+  </action>
+  <action name="actionMettre_jour_dans_la_BDD">
+   <property name="text">
+    <string>Mettre à jour dans la BDD</string>
+   </property>
+  </action>
+  <action name="actionSauvegarder_Poids">
+   <property name="text">
+    <string>Sauvegarder Poids...</string>
    </property>
   </action>
  </widget>

@@ -8,7 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     removeTempDir();
 
     ui->setupUi(this);
-    readSettings();
+    resize(ReadRegister::readInRegister("MainWindow/Size").toSize());
+    restoreState(ReadRegister::readInRegister("MainWindow/Properties").toByteArray());
     plot  = new QwtPlot(this);
     plot->setTitle("Courbe poids");
     plot->setAxisTitle(QwtPlot::xBottom,"millisecondes");
@@ -33,14 +34,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->complexCase->setDisabled(true);
 
     existFlat = false;
+    histoWindow = new histoDialog(this);
     omWindow = new OuvertureManchot(this);
+    managerPlatWindow = new AlgoPlatManager(this);
+    paramWindow = new Parametres(this);
+    updateDatabaseWindow = new UpdateDatabase(this);
+
+    db = database::dbConnect();
 }
 MainWindow::~MainWindow()
 {
     removeTempDir();
 
     writeSettings();
+    db.close();
+    delete histoWindow;
     delete omWindow;
+    delete managerPlatWindow;
+    delete paramWindow;
+    delete updateDatabaseWindow;
     delete ui;
 }
 
@@ -68,147 +80,168 @@ void MainWindow::on_actionQuitter_triggered()
 }
 
 void MainWindow::tracer(int num_passage, int minInt, int maxInt, int shouldSmooth) {
-
-    char titre[100];
-    double* xs;
-    double *dataInterval[4];
     QString dateTime="";
-    int h,m,s,ms,max;
-    analyse ANALYSE;
-    Flat *indexArray = new Flat();
-    Stat *statArray =  new Stat();
-    QVector<double> weightWithConfidence(2);
+    CaractFlat *indexArray = new CaractFlat();
+    Stat *statArray = new Stat();
     QString output = "";
     bool caseTab[2];
 
     caseTab[0] = ui->simpleCase->isChecked();
     caseTab[1] = ui->complexCase->isChecked();
 
-    errorOpenFile = FICHIERS.lire_fichier(filename,&l_data,&nb_valeur,&nb_passage,&cas,num_passage,&dateTime,caseTab);
+    errorOpenFile = FICHIERS.lire_fichier(filename,&l_data,&nb_valeur,&nb_passage,&cas,&numTransition, num_passage,&dateTime,caseTab);
 
     if (errorOpenFile != 1 ) {
-        if (maxInt == -1) {
-            plot->setAxisScale(QwtPlot::xBottom,minInt,nb_valeur);
-            ui->intervalMinSpinBox->setMaximum(nb_valeur);
-            ui->intervalMaxSpinBox->setMaximum(nb_valeur);
-            ui->intervalMaxSpinBox->setValue(nb_valeur);
-        }
-        else {
-            plot->setAxisScale(QwtPlot::xBottom,minInt,maxInt);
-            ui->intervalMinSpinBox->setMaximum(maxInt);
-            ui->intervalMaxSpinBox->setMaximum(maxInt);
-            ui->intervalMaxSpinBox->setValue(maxInt);
-        }
-        ui->intervalMinSpinBox->setValue(minInt);
-        ui->passageSpinBox->setRange(0,nb_passage-1);
+        initGraphicComposents(minInt,maxInt);
+
+        max = calculDatas(minInt,maxInt,shouldSmooth);
+
+        QVector<double> caractCourbe = anal.analysePassage(dataInterval,(max-minInt),indexArray,statArray);
+
+        output = displayResults(caractCourbe);
+
+        initPlot(dateTime,minInt);
+
+        output = database::displayWeightOnMainWindow(numTransition,output);
+        ui->algoResultLabel->setText(output);
+    }
+}
+
+void MainWindow::initGraphicComposents(int minInt, int maxInt) {
+    if (maxInt == -1) {
+        plot->setAxisScale(QwtPlot::xBottom,minInt,nb_valeur);
+        ui->intervalMinSpinBox->setMaximum(nb_valeur);
+        ui->intervalMaxSpinBox->setMaximum(nb_valeur);
+        ui->intervalMaxSpinBox->setValue(nb_valeur);
+    }
+    else {
+        plot->setAxisScale(QwtPlot::xBottom,minInt,maxInt);
+        ui->intervalMinSpinBox->setMaximum(maxInt);
+        ui->intervalMaxSpinBox->setMaximum(maxInt);
+        ui->intervalMaxSpinBox->setValue(maxInt);
+    }
+    ui->intervalMinSpinBox->setValue(minInt);
+    ui->passageSpinBox->setRange(0,nb_passage-1);
 
 
-        ui->balance1->setChecked(1);
-        ui->balance2->setChecked(1);
-        ui->balance3->setChecked(1);
-        ui->sommeBalance->setChecked(0);
-        ui->actionAlgorithme_de_plats->setEnabled(true);
-        ui->actionAfficher->setEnabled(true);
-        ui->passageSpinBox->setEnabled(true);
-        ui->drawButton->setEnabled(true);
-        ui->resetButton->setEnabled(true);
+    ui->balance1->setChecked(1);
+    ui->balance2->setChecked(1);
+    ui->balance3->setChecked(1);
+    ui->sommeBalance->setChecked(0);
+    ui->actionAlgorithme_de_plats->setEnabled(true);
+    ui->actionAfficher->setEnabled(true);
+    ui->passageSpinBox->setEnabled(true);
+    ui->drawButton->setEnabled(true);
+    ui->resetButton->setEnabled(true);
+}
 
-        selection[0] = 1;
-        selection[1] = 1;
-        selection[2] = 1;
-        selection[3] = 0;
+void MainWindow::initPlot(QString dateTime, int min) {
+    char date[13];
+    int plateau=0;
+    char titre[100];
+    int h,m,s,ms;
 
-        for(int j = 0 ;j<4;j++) {
-            curve[j]->detach();
-        }
+    color[0] = new QPen(Qt::blue);
+    color[1] = new QPen(Qt::green);
+    color[2] = new QPen(Qt::red);
+    color[3] = new QPen(Qt::black);
 
-        char date[13];
-        int plateau=0;
-        sscanf(qPrintable(dateTime),"%s %d-%d-%d-%d %d",date,&h,&m,&s,&ms,&plateau);
+    selection[0] = 1;
+    selection[1] = 1;
+    selection[2] = 1;
+    selection[3] = 0;
 
-        if ( cas == 'c' ) {
-           sprintf(titre,"%s\n%d h %d m %d s %d ms\nPlateau %d\nCas complexe",date,h,m,s,ms,plateau);
-        }
-        else{
-           sprintf(titre,"%s\n%d h %d m %d s %d ms\nPlateau %d\nCas simple",date,h,m,s,ms,plateau);
-        }
+    QwtPlotZoomer* zoomer = new QwtPlotZoomer(plot->canvas());
 
-        plot->setTitle(titre);
+    for(int j = 0 ;j<4;j++) {
+        curve[j]->detach();
+    }
 
-        if(maxInt == -1) {
-            max = nb_valeur;
-        }
-        else {
-            max = maxInt;
-        }
+    sscanf(qPrintable(dateTime),"%s %d-%d-%d-%d %d",date,&h,&m,&s,&ms,&plateau);
 
-        xs =(double*)calloc((max-minInt),sizeof(double));
+    if ( cas == 'c' ) {
+       sprintf(titre,"%s\n%d h %d m %d s %d ms\nPlateau %d\nCas complexe",date,h,m,s,ms,plateau);
+    }
+    else{
+       sprintf(titre,"%s\n%d h %d m %d s %d ms\nPlateau %d\nCas simple",date,h,m,s,ms,plateau);
+    }
 
-        for (int i=0;i<4;i++) {
-            dataInterval[i] = (double*)calloc((max-minInt),sizeof(double));
-            for(int j=minInt;j<max;j++) {
-                if (shouldSmooth > 0) {
-                    if ((j == 0) || (j==(nb_valeur-1))) {
-                        dataInterval[i][j-minInt] = l_data[i][j];
-                    }
-                    else {
-                        dataInterval[i][j-minInt] = (l_data[i][j-1] + l_data[i][j] + l_data[i][j+1])/3;
-                    }
-                }
-                else {
+    plot->setTitle(titre);
+
+
+    for(int j=0;j<4;j++)
+    {
+        curve[j]->setRawSamples(xs,dataInterval[j],(max-min));
+        if ( j < 3 ) {curve[j]->attach(plot);}
+        curve[j]->setPen(*color[j]);
+    }
+    zoomer->setZoomBase();
+
+    plot->updateAxes();
+    plot->replot();
+    plot->show();
+}
+
+void MainWindow::calculXDatas(int min, int max) {
+    for (int x = min; x < max; x++) {
+        xs[x-min]=x;
+    }
+}
+
+void MainWindow::calculYDatas(int minInt, int max, int shouldSmooth) {
+    for (int i=0;i<4;i++) {
+        dataInterval[i] = (double*)calloc((max-minInt),sizeof(double));
+        for(int j=minInt;j<max;j++) {
+            if (shouldSmooth > 0) {
+                if ((j == 0) || (j==(nb_valeur-1))) {
                     dataInterval[i][j-minInt] = l_data[i][j];
                 }
-
-            }
-        }
-
-        for (int x = minInt; x < max; x++) {
-            xs[x-minInt]=x;
-        }
-
-        color[0] = new QPen(Qt::blue);
-        color[1] = new QPen(Qt::green);
-        color[2] = new QPen(Qt::red);
-        color[3] = new QPen(Qt::black);
-        QwtPlotZoomer* zoomer = new QwtPlotZoomer(plot->canvas());
-
-        weightWithConfidence = ANALYSE.getWeightByFlat(dataInterval,(max-minInt),indexArray,statArray);
-
-        if (  anal.isGoodFlat(weightWithConfidence, dataInterval,(max-minInt)) ) {
-            output = "Algorithme plat:\nMasse : " + QString::number(weightWithConfidence[0]) + " kg\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
-            ui->algoResultLabel->setText(output);
-        }
-        else{
-            histoDialog *diag = new histoDialog();
-            double maxData[4];
-
-            diag->calculMax(dataInterval,(max-minInt),maxData);
-            QVector<double> caractSelected(2);
-            caractSelected = diag->caractLoiNormal(maxData,dataInterval,(max-minInt));
-
-            if ( caractSelected[0] > 0 ) {
-                output = "Algorithme histogramme:\nMasse : " + QString::number(caractSelected[0]) + " kg\nIndice de confiance : " + QString::number(caractSelected[1]);
-                ui->algoResultLabel->setText(output);
+                else {
+                    dataInterval[i][j-minInt] = (l_data[i][j-1] + l_data[i][j] + l_data[i][j+1])/3;
+                }
             }
             else {
-                output = "Courbe non traitée\n";
-                ui->algoResultLabel->setText(output);
+                dataInterval[i][j-minInt] = l_data[i][j];
             }
         }
-
-
-        for(int j=0;j<4;j++)
-        {
-            curve[j]->setRawSamples(xs,dataInterval[j],(max-minInt));
-            if ( j < 3 ) {curve[j]->attach(plot);}
-            curve[j]->setPen(*color[j]);
-        }
-        zoomer->setZoomBase();
-
-        plot->updateAxes();
-        plot->replot();
-        plot->show();
     }
+}
+
+int MainWindow::calculDatas(int min, int maxInt, int shouldSmooth) {
+    if(maxInt == -1) {
+        max = nb_valeur;
+    }
+    else {
+        max = maxInt;
+    }
+    xs =(double*)calloc((max-min),sizeof(double));
+    calculXDatas(min,max);
+    calculYDatas(min,max,shouldSmooth);
+
+    return max;
+}
+
+QString MainWindow::displayResults(QVector<double> caractCourbe) {
+    QString output="";
+    if ( caractCourbe.size() > 0 ) {
+        if ( caractCourbe[2] == 1 ) {
+            output = "Algorithme plat:\nMasse : " + QString::number(caractCourbe[0]) + " kg\nIndice de confiance : " + QString::number(caractCourbe[1])+ " %";
+            finalWeight = caractCourbe[0];
+        }
+        else if ( caractCourbe[2] == 2 ) {
+            output = "Algorithme histogramme:\nMasse : " + QString::number(caractCourbe[0]) + " kg\nIndice de confiance : " + QString::number(caractCourbe[1]) + " %";
+            finalWeight = caractCourbe[0];
+        }
+        else {
+            exit(5);
+        }
+    }
+    else {
+        output = "Courbe non traitée\n";
+        finalWeight = 0;
+    }
+
+    return output;
 }
 
 void MainWindow::on_passageSpinBox_valueChanged(int arg1)
@@ -281,7 +314,6 @@ void MainWindow::on_sommeBalance_clicked(bool checked)
 
 void MainWindow::on_actionAfficher_triggered()
 {
-    histoWindow = new histoDialog();
     histoWindow->initHisto();
     histoWindow->setData(l_data,nb_valeur);
     histoWindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -294,28 +326,16 @@ void MainWindow::on_drawButton_clicked()
     tracer(ui->passageSpinBox->value(),ui->intervalMinSpinBox->value(),ui->intervalMaxSpinBox->value());
 }
 
-void MainWindow::writeSettings() {
-    QSettings settings("METZGER","IHManchots");
-    settings.setValue("MainWindow/Size",size());
-    settings.setValue("MainWindow/Properties", saveState());
-}
-
-void MainWindow::readSettings() {
-    QSettings settings("METZGER","IHManchots");
-    resize(settings.value("MainWindow/Size",sizeHint()).toSize());
-    restoreState(settings.value("MainWindow/Properties").toByteArray());
-}
-
 void MainWindow::on_actionAlgorithme_de_plats_triggered()
 {
-    analyse ANALYSE;
-    Flat *indexArray = new Flat();
-    Stat *statArray =  new Stat();
+    CaractFlat *indexArray = new CaractFlat();
+    Stat *statArray = new Stat();
     QVector<double> weightWithConfidence(2);
     QString output = "";
 
-    weightWithConfidence = ANALYSE.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
+    managerPlatWindow->exec();
 
+    weightWithConfidence = anal.getWeightByFlat(l_data,nb_valeur,indexArray,statArray);
     output = "Poids : " + QString::number(weightWithConfidence[0]) + "\nIndice de confiance : " + QString::number(weightWithConfidence[1]);
     ui->algoResultLabel->setText(output);
 
@@ -391,7 +411,7 @@ void MainWindow::on_actionLisser_la_courbe_triggered()
     tracer(ui->passageSpinBox->value(),ui->intervalMinSpinBox->value(),ui->intervalMaxSpinBox->value(),1);
 }
 
-void MainWindow::traceFlat(Flat *indexArray) {
+void MainWindow::traceFlat(CaractFlat *indexArray) {
     double **xs[4];
     double **ys[4];
 
@@ -471,7 +491,6 @@ void MainWindow::on_actionR_sultat_triggered()
 
 void MainWindow::on_actionOptions_triggered()
 {
-    paramWindow = new Parametres();
     paramWindow->exec();
 }
 
@@ -480,4 +499,21 @@ void MainWindow::removeTempDir() {
     if ( dir.exists() ) {
         dir.removeRecursively();
     }
+}
+
+void MainWindow::on_actionMettre_jour_dans_la_BDD_triggered()
+{
+    database::updateManchot(finalWeight,numTransition);
+}
+
+void MainWindow::on_actionSauvegarder_Poids_triggered()
+{
+    updateDatabaseWindow->exec();
+    QMessageBox::information(this,"Succes","La période à bien été mise à jour dans la base de donnée !");
+}
+
+void MainWindow::writeSettings() {
+    QSettings settings("METZGER","IHManchots");
+    settings.setValue("MainWindow/Size",size());
+    settings.setValue("MainWindow/Properties", saveState());
 }

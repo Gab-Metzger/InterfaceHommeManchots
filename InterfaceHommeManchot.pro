@@ -17,37 +17,41 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     lecture_fichiers.cpp \
     histodialog.cpp \
-    statistique.cpp \
-    analyse.cpp \
     opentdmsdialog.cpp \
     ouverturemanchot.cpp \
     database.cpp \
     resultat.cpp \
-    parametres.cpp
+    parametres.cpp \
+    algoplatmanager.cpp \
+    updatedatabase.cpp \
+    readregister.cpp
 
 HEADERS  += mainwindow.h \
     lecture_fichiers.h \
     histodialog.h \
-    statistique.h \
-    analyse.h \
     opentdmsdialog.h \
     ouverturemanchot.h \
     database.h \
     resultat.h \
-    parametres.h
+    parametres.h \
+    algoplatmanager.h \
+    updatedatabase.h \
+    readregister.h
 
 FORMS    += mainwindow.ui \
     histodialog.ui \
     opentdmsdialog.ui \
     ouverturemanchot.ui \
     resultat.ui \
-    parametres.ui
+    parametres.ui \
+    algoplatmanager.ui \
+    updatedatabase.ui
 
 DEPENDPATH += C:\qwt-6.1.0\include\
 INCLUDEPATH += C:\qwt-6.1.0\src\
 LIBS += -LC:\qwt-6.1.0\lib\qwt.dll
 LIBS += -LC:\qwt-6.1.0\lib\qwtd.dll
-LIBS += -L"$$_PRO_FILE_PWD_\libs" -lOpenTdms
+LIBS += -L"$$_PRO_FILE_PWD_\libs" -lOpenTdms -lanalyse -lstatistique
 
 RESOURCES += \
     images.qrc
